@@ -1,2 +1,20 @@
+library(shiny)
+library(shinydashboard)
+library(flexdashboard)
+library(shinyjs)
+library(waiter)
+library(highcharter)
+library(sever)
+library(tidyverse)
+library(glue)
+library(tti)
+library(shinyWidgets)
+library(viridisLite)
+library(tools)
+library(tippy)
+library(yaml)
+library(V8)
+library(shinycssloaders)
 
-## add commonly used functions to call in the app here
+
+# other commonly used functions can go here
