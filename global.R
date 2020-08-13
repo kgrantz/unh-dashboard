@@ -1,20 +1,14 @@
 library(shiny)
-library(shinydashboard)
-library(flexdashboard)
+library(shinythemes)
 library(shinyjs)
-library(waiter)
-library(highcharter)
-library(sever)
 library(tidyverse)
 library(glue)
-library(tti)
-library(shinyWidgets)
 library(viridisLite)
-library(tools)
-library(tippy)
-library(yaml)
-library(V8)
-library(shinycssloaders)
-
 
 # other commonly used functions can go here
+
+
+load_data <- function(){
+  dat <- read.csv("data/recent_data.csv")
+  return(dat)
+}

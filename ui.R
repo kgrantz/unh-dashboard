@@ -1,48 +1,33 @@
 function(request) {
   dashboardPage(
-    title = "UNH Dashboard",
     
+    ## HEADER --------------- 
     dashboardHeader(
-      titleWidth = 320,
-      disable = FALSE,
-      tags$li(
-        class = "dropdown",
-        tags$a(
-          href = "https://coronavirus.jhu.edu/", target = "_blank",
-          tags$img(src = "jhu-logo.jpg", height = 50),
-          style = "padding-top: 0; padding-bottom:0"
-        )
-      )
+      title = "UNH Dashboard"
     ), # end header
     
+    ## SIDEBAR --------------- 
     dashboardSidebar(
-      width = 320,
+      width=280,
       sidebarMenu(
-        id = "tabs",
-        menuItem("Home", tabName = "home"),
-        menuItem(
-          "UNH Campus Summary",
-          tabName = "campus-summary",
-          icon = icon("search")
-        ),
-        menuItem(
-          "UNH Laboratory Testing",
-          tabName = "lab-testing",
-          icon = icon("home")
-        ),
-        menuItem(
-          "NH State Summary",
-          tabName = "nh-state",
-          icon = icon("user")
-        ),
-        menuItem(
-          "About",
-          tabName = "about",
-          icon = icon("info-circle")
-        )
-      )
-    ), # end Sidebar
+        id="tabs",
+        menuItem("Dashboard", 
+                 tabName = "dashboard", 
+                 icon = icon("dashboard")),
+        menuItem("Campus", 
+                 tabName = "campus",
+                 icon = icon("university")),
+        menuItem("Laboratory Testing",
+                 tabName = "lab",
+                 icon=icon("vial")),
+        menuItem("NH State Summary",
+                 tabName = "nh-state",
+                 icon = icon("globe"))
+      ) # END sidebarMenu
+    ), # END sideBAR
     
+    
+    ## BODY --------------- 
     dashboardBody(
       includeCSS("www/custom.css"),
       use_sever(),
@@ -50,19 +35,19 @@ function(request) {
       use_hostess(),
       waiter_show_on_load(
         html = tagList(
-          h2("getting everything set up..."),
+          h2("loading..."),
           br(),
-          spin_loaders(id = 11, color = "#f1c400"),
+          spin_loaders(id = 11, color = "#f77a05"),
           br(), br(),
-          h3("Johns Hopkins Bloomberg School of Public Health")
+          h3("University of New Hampshire")
         ),
-        color = "#002d72"
+        color = "#0044bb"
       ),
       useShinyjs(),
       extendShinyjs(text = 'shinyjs.bkg_col = function(params) {
       var defaultParams = {
       id : null,
-      col : "#f1c400"
+      col : "#001d52"
       };
       params = shinyjs.getParams(params, defaultParams);
       var el = $("#" + params.id);
@@ -73,61 +58,35 @@ function(request) {
       tabItems(
         ## Home --------------------------------------------------------------------
         tabItem(
-          tabName = "home",
-          p(class = "app-title", "UNH Dashboard", align = "center"),
+          tabName = "dashboard",
+          p(class="app-title", "UNH Dashboard", align = "center"),
           p(glue(
             "Welcome to the UNH Dashboard "
           )),
           HTML(glue(
-            "<ol><li> this app will do these kinds of things <li> This too!</ol>"
-          ))#,
-          # br(),
-          # fluidRow(
-          #   box(
-          #     width = 6, status = "primary",
-          #     textInput("name", text_q("What is your community's name?", "help/name.md")),
-          #     textInput("prepared_by", text_q("Who is preparing this report?", "help/prepared_by.md"))
-          #   )
-          # ),
-          # fluidRow(
-          #   box(width = 12, status = "primary",
-          #       checkboxInput("save_server",
-          #                     tagList("Please check this box to save your inputs temporarily in your browser. Checking this option may enhance your user experience with this application. If you don't check this box, you could lose your work if you lose internet connectivity or disconnect from the server for other reasons. This information will not be used by our team nor shared with anyone else.",
-          #                             br(), br(), "Regardless of whether you check this box, you should regularly save your inputs locally by clicking 'Save Inputs' in the Navigation pane."))
-          #   ),
-          #   actionButton("surv", "GET STARTED",
-          #                style = "background-color: #f1c400;"
-          #   )
-          # )
-        ), # END Home page 
+            "<ol><li> This app will do these kinds of things",
+            "<li> This too!</ol>"
+          ))
+        ), # END Home page   
         
-        
-        ## UNH Campus Summary -----------------------------------------------------------------
+        ## Campus --------------------------------------------------------------------
         tabItem(
-          tabName = "campus-summary",
-          p(class = "app-title", "UNH Campus Summary", align = "center")
-        ), # END Campus Summary
+          tabName="campus"
+        ),
         
-        ## Lab Testing ---------------------------------------------------------------
+        ## Lab testing --------------------------------------------------------------------
         tabItem(
-          tabName = "lab-testing",
-          p(class = "app-title", "UNH Laboratory Testing", align = "center")
-        ), # END Laboratory Testing
-        
-        ## UNH State Dash ---------------------------------------------------------------
+          tabName="lab"
+        ),        
+     
+        ## NH State --------------------------------------------------------------------
         tabItem(
-          tabName = "nh-state",
-          p(class = "app-title", "New Hampshire State", align = "center")
-        ), # END NH State 
-        
-        ## Dashboard ---------------------------------------------------------------
-        tabItem(
-          tabName = "about",
-          p(class = "app-title", "About", align = "center"),
-          uiOutput("prepared_by_out")
-        ) # END Dashboard
-        
+          tabName="nh-state"
+        )
       ) # END tabItems
-    ) # END Dashboard body
-  ) # END Dashboard page
-}
+    ) # END dashboardBody
+  ) # END dashboardPage
+} # END function
+  
+  
+  
