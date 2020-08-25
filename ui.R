@@ -8,7 +8,7 @@ function(request) {
     
     ## SIDEBAR --------------- 
     dashboardSidebar(
-      width=280,
+      width=240,
       sidebarMenu(
         id="tabs",
         menuItem("Dashboard", 
@@ -16,73 +16,186 @@ function(request) {
                  icon = icon("dashboard")),
         menuItem("Campus", 
                  tabName = "campus",
-                 icon = icon("university")),
-        menuItem("Laboratory Testing",
-                 tabName = "lab",
-                 icon=icon("vial")),
-        menuItem("NH State Summary",
-                 tabName = "nh-state",
-                 icon = icon("globe"))
+                 icon = icon("university"))
       ) # END sidebarMenu
-    ), # END sideBAR
+    ), # END sidebar
     
     
     ## BODY --------------- 
     dashboardBody(
-      includeCSS("www/custom.css"),
-      use_sever(),
-      use_waiter(include_js = FALSE),
-      use_hostess(),
-      waiter_show_on_load(
-        html = tagList(
-          h2("loading..."),
-          br(),
-          spin_loaders(id = 11, color = "#f77a05"),
-          br(), br(),
-          h3("University of New Hampshire")
-        ),
-        color = "#0044bb"
-      ),
-      useShinyjs(),
-      extendShinyjs(text = 'shinyjs.bkg_col = function(params) {
-      var defaultParams = {
-      id : null,
-      col : "#001d52"
-      };
-      params = shinyjs.getParams(params, defaultParams);
-      var el = $("#" + params.id);
-      el.css("background-color", params.col);
-                    }'),
-      tags$script(HTML("$('body').addClass('fixed');")),
       
       tabItems(
         ## Home --------------------------------------------------------------------
         tabItem(
           tabName = "dashboard",
-          p(class="app-title", "UNH Dashboard", align = "center"),
-          p(glue(
-            "Welcome to the UNH Dashboard "
-          )),
-          HTML(glue(
-            "<ol><li> This app will do these kinds of things",
-            "<li> This too!</ol>"
-          ))
-        ), # END Home page   
+          h3("University of New Hampshire COVID-19 Dashboard", align="center"),
+          br(),
+          textOutput("date_updated"),
+          br(),
+          fluidPage(
+            ## START: lefthand column
+            column(
+              width=6,
+              box(
+                status="primary",
+                width=NULL,
+                solidHeader = TRUE,
+                title = "Confirmed COVID-19 Cases in UNH Community",
+                plotOutput("epi_curve_total") # TO DO: figure out why this isn't rendering
+              ),
+              box(
+                status="primary",
+                width=NULL,
+                solidHeader = TRUE,
+                title = "Statewide conditions",
+                fluidRow(
+                  uiOutput("state_cases"), # TO DO: figure out why this isn't rendering
+                  box( p("Hospitalizations"), # TO DO: generate these boxes (or box within this box) in server to control color
+                       p("14-day"),
+                       background = "blue",
+                       width=4),
+                  box( p("Current Restrictions"), # TO DO: generate these boxes (or box within this box) in server to control color
+                       br(),
+                       background = "blue",
+                       width=4)
+                ) 
+              )
+            ), # END lefthand column
+            
+            ## START: righthand column
+            column(
+              width=6,
+              box(
+                status="primary",
+                width=NULL,
+                solidHeader=TRUE,
+                title="College Operating Conditions",
+                fluidRow(), # TO DO: names of each reopening metric
+                fluidRow(
+                  # TO DO add 4 boxes for each campus reopening status - build in server to control color
+                  box("Durham", width=2)
+                  #box1
+                  #box2
+                  #box3
+                  #box4
+                ),
+                
+                fluidRow("Manchester"),
+                
+                fluidRow("Concord (Law)"),
+                
+                fluidRow("Keene State"),
+                
+                fluidRow("Plymouth St.")
+              )
+            ) # END righthand column
+            
+          ) # END fluidPage
+        ), # END home page
         
         ## Campus --------------------------------------------------------------------
         tabItem(
-          tabName="campus"
-        ),
-        
-        ## Lab testing --------------------------------------------------------------------
-        tabItem(
-          tabName="lab"
-        ),        
-     
-        ## NH State --------------------------------------------------------------------
-        tabItem(
-          tabName="nh-state"
-        )
+          tabName="campus",
+          
+          fluidRow(
+            # TO DO: add in dropdown menu to choose campus for filtering here
+          ),
+          
+          ## START: lefthand column/box
+          box(
+            width=6,
+            status="primary",
+            solidHeader = TRUE,
+            title = glue("Confirmed COVID-19 Cases in", "TO DO",), # TO DO: add in chosen campus name - in server
+            
+            # epi curve
+            fluidRow(
+              column(
+                width=9
+                # TO DO: add in epi curve for chosen campus + display view
+              ),
+              column(
+                width=3
+                # TO DO: add in radio buttons to choose display view for epi curve
+              )
+            ),
+            
+            # numeric indicators
+            fluidRow(
+              # TO DO: format these more nicely
+              box(
+                p("# active cases in isolation"),
+                p("total (symptomatic)"),
+                uiOutput("n_isol_label"),
+                background = "blue",
+                width=4
+              ),
+              box(
+                p("# quarantined"),
+                p("total"),
+                uiOutput("n_quar"),
+                background = "blue",
+                width=4
+              ),
+              box(
+                p("Days from test to isolation"),
+                p("7-day median"),
+                uiOutput("n_isol_label"), # TO DO: make days
+                background = "blue",
+                width=4
+              )
+            ),
+            
+            # Dorm table 
+            fluidRow(
+              # TO DO - build dorm table as kable object in server + output here
+            )
+            
+          ), # END lefthand column
+          
+          ## START righthand column
+          box(
+            width=6,
+            status="primary",
+            solidHeader = TRUE,
+            title = "Testing Statistics",
+            
+            fluidRow(
+              # TO DO: add in testing figure; build in "tests not submitted" to ggplot object
+            ),
+            
+            fluidRow(
+              box(
+                width=6,
+                p("Median days from sample collection to test result day")
+              ),
+              box(
+                width=2,
+                status="primary",
+                solidHeader = TRUE,
+                title = "UNH"
+                # TO DO: add in UNH sample dates
+              ),
+              box(
+                width=2,
+                status="primary",
+                solidHeader = TRUE,
+                title = "Quest"
+                # TO DO: add in Quest testing delays
+              ),
+              box(
+                width=2,
+                status="primary",
+                solidHeader = TRUE,
+                title = "CMD"
+                # TO DO: add in CMD testing delays
+              )
+              
+            )
+          ) # END righthand column
+          
+        ) # END campus page
+
       ) # END tabItems
     ) # END dashboardBody
   ) # END dashboardPage
