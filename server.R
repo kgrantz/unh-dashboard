@@ -1,6 +1,4 @@
-function(input, output, session) {
-  Sys.sleep(2)
-  waiter_hide()
+function(input, output, session){
   
   ## Home page -----------------------------------------------------------------
   # output$date_updated <- renderText({glue("Last updated: ", "{Sys.Date()}")}) # TO DO: update this with data load
@@ -22,11 +20,26 @@ function(input, output, session) {
   
   ## UNH Campus Situation -------------------------------------------------------
   
+  # camppus <- reactive({
+  #   input$campus
+  # })
+  # observeEvent(input$campus, { output$epi_curve_detail_title <- renderUI({ campus() })  })
+  
+  output$epi_curve_detail_title <- renderUI({
+    if(input$campus=="All"){
+      "Confirmed COVID-19 Cases in All Campuses"
+    }else{
+      glue("Confirmed COVID-19 Cases in {input$campus}")
+    }
+  })
+      
   # TO DO: replace this with function that builds epi curve for selected campus
   # using input$campus
   # Function should also take argument input$epi_curve_type to determine whether
   # the epi curve bars are split by role (student/employee) or on/off campus
-  output$epi_curve_detail <- renderPlot({hist(rnorm(100), main="Epi Curve - Detailed", col="cornflowerblue")})
+  output$epi_curve_detail <- renderPlot({
+    hist(rnorm(100), main=glue("Epi Curve - Detailed", "{input$campus}"), col="cornflowerblue")
+  })
   
   # TO DO: calculate total under isolation for given input$campus
   n_isol <- 7
@@ -38,7 +51,5 @@ function(input, output, session) {
   # TO DO: add in tests to make sure these numbers are reasonable (e.g., sym <= total)
   # TO DO: make this a function to renderUI the entire box, not just value to be passed to UI
   output$n_isol_label <- renderText({glue("{n_isol}", " (", "{n_isol_sym}", ")")})
-  
-  ## Lab Testing --------------------------------------------------------
   
 }

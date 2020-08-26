@@ -1,4 +1,4 @@
-function(request) {
+ui <- 
   dashboardPage(
     
     ## HEADER --------------- 
@@ -28,10 +28,11 @@ function(request) {
         ## Home --------------------------------------------------------------------
         tabItem(
           tabName = "dashboard",
-          h3("University of New Hampshire COVID-19 Dashboard", align="center"),
+          h3(strong("University of New Hampshire COVID-19 Dashboard"), 
+             align="center",
+             style = "font-family:'glypha';color:#003591"),
           br(),
-          textOutput("date_updated"),
-          br(),
+          textOutput("date_updated"), # TO DO: figure out why this isn't rendering
           fluidPage(
             ## START: lefthand column
             column(
@@ -40,8 +41,8 @@ function(request) {
                 status="primary",
                 width=NULL,
                 solidHeader = TRUE,
-                title = "Confirmed COVID-19 Cases in UNH Community",
-                plotOutput("epi_curve_total") # TO DO: figure out why this isn't rendering
+                title = div("Confirmed COVID-19 Cases in UNH Community", style = "font-family:'Source Sans Pro'"),
+                plotOutput(outputId = "epi_curve_total") # TO DO: figure out why this isn't rendering
               ),
               box(
                 status="primary",
@@ -49,7 +50,7 @@ function(request) {
                 solidHeader = TRUE,
                 title = "Statewide conditions",
                 fluidRow(
-                  uiOutput("state_cases"), # TO DO: figure out why this isn't rendering
+                  uiOutput(outputId = "state_cases"), # TO DO: figure out why this isn't rendering
                   box( p("Hospitalizations"), # TO DO: generate these boxes (or box within this box) in server to control color
                        p("14-day"),
                        background = "blue",
@@ -98,7 +99,19 @@ function(request) {
           tabName="campus",
           
           fluidRow(
-            # TO DO: add in dropdown menu to choose campus for filtering here
+            column(
+              width=6, 
+              offset=3,
+              selectInput("campus", 
+                          "Select a campus to display:", 
+                          choices = c("All",
+                                      "Durham",
+                                      "Manchester",
+                                      "Concord",
+                                      "Keene State",
+                                      "Plymouth State"),
+                          selected = "All")
+            )
           ),
           
           ## START: lefthand column/box
@@ -106,16 +119,20 @@ function(request) {
             width=6,
             status="primary",
             solidHeader = TRUE,
-            title = glue("Confirmed COVID-19 Cases in", "TO DO",), # TO DO: add in chosen campus name - in server
+            title = uiOutput(outputId="epi_curve_detail_title"), # TO DO: figure out why this isn't rendering as UI or text
             
             # epi curve
             fluidRow(
               column(
-                width=9
-                # TO DO: add in epi curve for chosen campus + display view
+                width=9,
+                plotOutput(outputId="epi_curve_detail")
               ),
               column(
-                width=3
+                width=3,
+                radioButtons("epicurve_var",
+                             "Show cases by:",
+                              choices=c("Student/Faculty + Staff"=1, "Off/On-Campus"=2),
+                              selected=1)
                 # TO DO: add in radio buttons to choose display view for epi curve
               )
             ),
@@ -198,8 +215,7 @@ function(request) {
 
       ) # END tabItems
     ) # END dashboardBody
-  ) # END dashboardPage
-} # END function
-  
+) # END dashboardPage
+
   
   
