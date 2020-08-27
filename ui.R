@@ -118,7 +118,7 @@ dashboardPage(
             box(
               p("# active cases in isolation"),
               p("total (symptomatic)"),
-              uiOutput("n_isol_label"),
+              #uiOutput("n_isol_label"),
               background = "blue",
               width=4
             ),
