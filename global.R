@@ -25,3 +25,12 @@ text_q <- function(text, help) {
     icon("question-circle") %>% my_tippy(help)
   )
 }
+
+# if a value is less than 5, display "1 - 5" - requested by UNH for confidentiality
+print_under5 <- function(x){
+  if(is.na(x)){return("NA")}else{
+    if(x>5){return(as.character(x))}
+    if(x>0 & x<5){return("1 - 5")}
+    if(x==0){return("0")}
+  }
+}

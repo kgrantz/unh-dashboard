@@ -35,25 +35,25 @@ shinyServer(
 # An idea to generate state wide boxes color coded on value using the randomly generated numbers above
 #Number of Cases
 output$state_case <- renderValueBox({valueBox(p(ceiling(random_numbers()[1])),"positive cases",
-                                     width=4,
-                                     color=ifelse(random_numbers()[1] > 50,"blue","yellow"),
-                                    )})
+                                              width=4,
+                                              color=ifelse(random_numbers()[1] > 50,"blue","yellow"),
+                                              href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
+)})
 
 #Hospitalization
 output$hospitalization <- renderValueBox({valueBox(p(ceiling(random_numbers()[2])),"hospitalizations",
-                                          width=4,
-                                          color=ifelse(random_numbers()[2] > 50,"blue","yellow")
-                                         )})
-  
-  
+                                                   width=4,
+                                                   color=ifelse(random_numbers()[2] > 50,"blue","yellow"),
+                                                   href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
+)})
+
+
 #Current Restrictions  
 output$current_restrictions <- renderValueBox({valueBox(p(ceiling(random_numbers()[2])),"Current Restrictions",
-                                                 width=4,
-                                                 color=ifelse(random_numbers()[2] > 50,"blue","yellow")
-                                                )})
-  
-  
-  
+                                                        width=4,
+                                                        color=ifelse(random_numbers()[2] > 50,"blue","yellow"),
+                                                        href="https://www.covidguidance.nh.gov/"
+)})
   
   ## UNH Campus Situation -------------------------------------------------------
   
