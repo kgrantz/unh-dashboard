@@ -7,6 +7,7 @@ library(glue)
 library(viridisLite)
 library(tippy)
 library(readr)
+library(DT)
 
 
 ## Helper functions ----
