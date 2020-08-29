@@ -1,12 +1,15 @@
 #function(request) 
 dashboardPage(
+
   
-  ## HEADER --------------- 
+  
+  # HEADER --------------- 
   dashboardHeader(
     title = "UNH Dashboard"
   ), # end header
   
   ## SIDEBAR --------------- 
+  ##added conditional dropdown for campus tab
   dashboardSidebar(
     width=240,
     sidebarMenu(
@@ -16,24 +19,35 @@ dashboardPage(
                icon = icon("dashboard")),
       menuItem("Campus", 
                tabName = "campus",
-               icon = icon("university"))
+               icon = icon("university")),
+      conditionalPanel(
+        'input.tabs == "campus"',
+        menuItemOutput("campus_dropdown")
+      )
+      
     ) # END sidebarMenu
   ), # END sidebar
   
   ## BODY --------------- 
   dashboardBody(
+    #universal HTML tag to center-align all boxes
+    tags$style(HTML("div{text-align: center
+                                }
+                     #box1{height: 60px;
+                      }
+                     ")),
     tabItems(
       ## Home --------------------------------------------------------------------
       tabItem(
         tabName = "dashboard",
-        h3("University of New Hampshire COVID-19 Dashboard", align="center"),#the html was interfering with render plot below. Need to figure out a workaround to display the data
+        h3("University of New Hampshire COVID-19 Dashboard"),#the html was interfering with render plot below. Need to figure out a workaround to display the data
         column(width=6,
                fluidRow(
                  box(status="primary",
                      width=NULL,
                      solidHeader = TRUE,
                      title = "Confirmed COVID-19 Cases in UNH Community",
-                     plotOutput("epi_curve_total", height=250)
+                     plotOutput("epi_curve_total", height=300)
                  )# end box
                ),#end fluid row
                fluidRow(
@@ -59,17 +73,18 @@ dashboardPage(
             width=NULL,
             solidHeader=TRUE,
             title="College Operating Conditions",
+           
             fluidRow(
-              box(p(""), width= 2,height=60,style="color: black; font-size: 14px; font-weight: bold"),
-              box("Active Cases ", width= 2,height=60,style="color: black; font-size: 14px; font-weight: bold"),
-              box("Case Rate", width=2, height = 60,style="color: black; font-size: 14px; font-weight: bold"),
-              box("% iso beds in use", width =2, height = 60,style="color: black; font-size: 11px; font-weight: bold"),
-              box("% qu beds in use", width = 2, height = 60, style="color: black; font-size: 11px; font-weight: bold")
+              box(p(""),width=2, height=60, style="color: black; font-size: 14px; font-weight: bold"),
+              box("Active Cases ",width=2,height=60,style="color: black; font-size: 14px; font-weight: bold"),
+              box("Case Rate",width=2,height=60,style="color: black; font-size: 14px; font-weight: bold"),
+              box("% iso beds in use",width=2,height=60,style="color: black; font-size: 11px; font-weight: bold"),
+              box("% qu beds in use", width=2,height=60,style="color: black; font-size: 11px; font-weight: bold")
             ),#added html formatting to boxes 
             # TO DO: names of each reopening metric
             fluidRow(
               # TO DO add 4 boxes for each campus reopening status - build in server to control color
-              box(p("Durham",style="text-align:center"),background="teal",width= 2,height=60,style="color: black; font-size: 12px; font-weight: bold; text-aligh:center")
+              box("Durham",background="teal",width= 2,height=60,style="color: black; font-size: 12px; font-weight: bold")
               #box1
               #box2
               #box3
@@ -89,74 +104,52 @@ dashboardPage(
       ## Campus --------------------------------------------------------------------
       tabItem(
         tabName="campus",
-        
-        fluidRow(
-          # TO DO: add in dropdown menu to choose campus for filtering here
-        ),
+        h3(textOutput("campus_text")),
         
         ## START: lefthand column/box
-        box(
-          width=6,
-          status="primary",
-          solidHeader = TRUE,
-          title = glue("Confirmed COVID-19 Cases in", "TO DO",), # TO DO: add in chosen campus name - in server
-          
-          # epi curve
+        
+        column(width = 6,style = "background-color:#FFFFFF;",
+        #Gave a uniform white background to the column. Remove if needed
+          # epi curve - tabset box with tabs for different views
           fluidRow(
-            column(
-              width=9
-              # TO DO: add in epi curve for chosen campus + display view
-            ),
-            column(
-              width=3
-              # TO DO: add in radio buttons to choose display view for epi curve
+            tabBox(title = h4("Epidemic Curve"),
+                   # The id lets us use input$tabset1 on the server to find the current tab
+                   id = "campus_epi_curve",width=NULL,height=250,
+                   tabPanel("On / Off campus", plotOutput("location_plot",height=200)),
+                   tabPanel("Student / Faculty", plotOutput("personnel_plot",height=200))
             )
-          ),
-          
+            
+
+            ),# end fluidRow
+              # TO DO: add in radio buttons to choose display view for epi curve
+            #)
+          #),#end right side column,
+          #column(width=6,
           # numeric indicators
           fluidRow(
             # TO DO: format these more nicely
-            box(
-              p("# active cases in isolation"),
-              p("total (symptomatic)"),
-              #uiOutput("n_isol_label"),
-              background = "blue",
-              width=4
-            ),
-            box(
-              p("# quarantined"),
-              p("total"),
+              uiOutput("n_isol_label"),
+            #),
+          #fluidRow(
               uiOutput("n_quar"),
-              background = "blue",
-              width=4
-            ),
-            box(
-              p("Days from test to isolation"),
-              p("7-day median"),
-              uiOutput("n_isol_label"), # TO DO: make days
-              background = "blue",
-              width=4
-            )
-          ),
-          
+            #),
+            #),
+            #fluidRow(
+              uiOutput("n_test")),
           # Dorm table 
           fluidRow(
-            # TO DO - build dorm table as kable object in server + output here
-          )
+            dataTableOutput("mytable",height=75),width=NULL,height=100)
+            
           
-        ), # END lefthand column
+          ),# END lefthand column
+        #not many changes made in campus tab after this. Testing statistics column still pending. Need more
+        #details on this plot.
         
+      column(width=6,
         ## START righthand column
-        box(
-          width=6,
-          status="primary",
-          solidHeader = TRUE,
-          title = "Testing Statistics",
-          
-          fluidRow(
+                  fluidRow(
             # TO DO: add in testing figure; build in "tests not submitted" to ggplot object
           ),
-          
           fluidRow(
             box(
               width=6,
@@ -188,10 +181,11 @@ dashboardPage(
         ) # END righthand column
         
       ) # END campus page
+      )
       
     ) # END tabItems
   ) # END dashboardBody
-) # END dashboardPage
+#) # END dashboardPage
 #} # END function
 
 
