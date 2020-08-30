@@ -40,14 +40,16 @@ dashboardPage(
       ## Home --------------------------------------------------------------------
       tabItem(
         tabName = "dashboard",
-        h3("University of New Hampshire COVID-19 Dashboard"),#the html was interfering with render plot below. Need to figure out a workaround to display the data
+        div(style = "margin-top:-1em",  ##shaving off annoying blank space from the top
+        h4(strong("University of New Hampshire COVID-19 Dashboard"))#the html was interfering with render plot below. Need to figure out a workaround to display the data
+        ),
         column(width=6,
                fluidRow(
                  box(status="primary",
                      width=NULL,
                      solidHeader = TRUE,
                      title = "Confirmed COVID-19 Cases in UNH Community",
-                     plotOutput("epi_curve_total", height=300)
+                     plotOutput("epi_curve_total", height=270)
                  )# end box
                ),#end fluid row
                fluidRow(
@@ -103,8 +105,11 @@ dashboardPage(
       ),# END tabItem
       ## Campus --------------------------------------------------------------------
       tabItem(
-        tabName="campus",
-        h3(textOutput("campus_text")),
+        tabName="campus", 
+        div(style = "margin-top:-1em", #the html was interfering with render plot below. Need to figure out a workaround to display the data
+        
+        h4(strong(textOutput("campus_text")))
+        ),
         
         ## START: lefthand column/box
         
@@ -112,9 +117,9 @@ dashboardPage(
         #Gave a uniform white background to the column. Remove if needed
           # epi curve - tabset box with tabs for different views
           fluidRow(
-            tabBox(title = h4("Epidemic Curve"),
+            tabBox(title = h5("Epidemic Curve"),
                    # The id lets us use input$tabset1 on the server to find the current tab
-                   id = "campus_epi_curve",width=NULL,height=250,
+                   id = "campus_epi_curve",width=NULL,height=240,
                    tabPanel("On / Off campus", plotOutput("location_plot",height=200)),
                    tabPanel("Student / Faculty", plotOutput("personnel_plot",height=200))
             )
@@ -126,7 +131,8 @@ dashboardPage(
           #),#end right side column,
           #column(width=6,
           # numeric indicators
-          fluidRow(
+        div(style = "font-size: 12px",##reducing font size to fit things in
+            fluidRow(
             # TO DO: format these more nicely
               uiOutput("n_isol_label"),
             #),
@@ -135,11 +141,14 @@ dashboardPage(
             #),
             #),
             #fluidRow(
-              uiOutput("n_test")),
+              uiOutput("n_test"))
+             ),
           # Dorm table 
-          fluidRow(
-            dataTableOutput("mytable",height=75),width=NULL,height=100)
-            
+        div(style = "font-size: 13px; margin-top:-8em", ##reducing font size.
+            fluidRow(
+            dataTableOutput("mytable",height=50),width=NULL,height=70)
+                   
+            )
           
           ),# END lefthand column
         #not many changes made in campus tab after this. Testing statistics column still pending. Need more
