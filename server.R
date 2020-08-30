@@ -148,15 +148,15 @@
     #other preferences
     output$n_isol_label <- renderUI({box(
       strong("# active cases in isolation"),br(), em("Total  (symptomatic)"),
-      h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),width=4, height=110,solidHeader = TRUE,background="black")})
+      h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),width=4, height=100,solidHeader = TRUE,background="black")})
     
     output$n_quar <- renderUI({box(
       strong("# of Durham quarantined"), br(), em("Total"),
-      h4(n_quar_no()),width=4,height=110,solidHeader = TRUE)})
+      h4(n_quar_no()),width=4,height=100,solidHeader = TRUE)})
     
     output$n_test <- renderUI({box(
       strong("Days from test to isolation"), br(), em("7-day median"),
-      h4(n_test_no),width=4,height=110,solidHeader = TRUE,background="orange")})
+      h4(n_test_no),width=4,height=100,solidHeader = TRUE,background="orange")})
     
     #hard coded this table. #TO find out what these numbers mean, create a dummy table for them
     #difficult to create a subtitle in table header in shiny. TO DO: see if there is a way
@@ -168,7 +168,7 @@
     Dorm_tab <- cbind(Dorm,Positive_tests,perc_positive,n_quart)
     
     
-    colnames(Dorm_tab) <- c("Dorm","Positive tests","% Positivity", "# Quaratined")
+    colnames(Dorm_tab) <- c("Dorm","Positive tests","% Positivity", "# Quarantined")
     
     
     
