@@ -30,11 +30,14 @@ dashboardPage(
   
   ## BODY --------------- 
   dashboardBody(
-    #universal HTML tag to center-align all boxes
+    #universal HTML tag to center-align all boxes, remove shadow borders
     tags$style(HTML("div{text-align: center
                                 }
                      #box1{height: 60px;
-                      }
+                     }
+                    .box{-webkit-box-shadow: none; 
+                    -moz-box-shadow: none;
+                    box-shadow: none;}
                      ")),
     tabItems(
       ## Home --------------------------------------------------------------------
@@ -59,17 +62,22 @@ dashboardPage(
                    width=NULL,
                    title = "Statewide conditions",
                    fluidRow(
-                     valueBoxOutput("state_case"),
-                     valueBoxOutput("hospitalization"),
-                     valueBoxOutput("current_restrictions") # TO DO: generate these boxes (or box within this box) in server to control color
-                     
-                     
+                     uiOutput("state_case_label"),
+                     uiOutput("hospitalization_label"), 
+                     uiOutput("current_restrictions_label")
+                   ),
+                   fluidRow(
+                     uiOutput("state_case"),
+                     uiOutput("hospitalization"),
+                     uiOutput("current_restrictions")
                    )#end fluid row
                  )#end box
                )#end fluid row
         ),#end Column 1
+        
         column(
           width=6,
+          div(style = "font-size: 16px; vertical-align: middle",
           box(
             status="primary",
             width=NULL,
@@ -77,32 +85,40 @@ dashboardPage(
             title="College Operating Conditions",
            
             fluidRow(
-              box(p(""),width=2, height=60, style="color: black; font-size: 14px; font-weight: bold"),
-              box("Active Cases ",width=2,height=60,style="color: black; font-size: 14px; font-weight: bold"),
-              box("Case Rate",width=2,height=60,style="color: black; font-size: 14px; font-weight: bold"),
-              box("% iso beds in use",width=2,height=60,style="color: black; font-size: 11px; font-weight: bold"),
-              box("% qu beds in use", width=2,height=60,style="color: black; font-size: 11px; font-weight: bold")
-            ),#added html formatting to boxes 
-            # TO DO: names of each reopening metric
-            fluidRow(
-              # TO DO add 4 boxes for each campus reopening status - build in server to control color
-              box("Durham",background="teal",width= 2,height=60,style="color: black; font-size: 12px; font-weight: bold")
-              #box1
-              #box2
-              #box3
-              #box4
+              box("",width=3,height=30, style="font-weight: bold"),
+              box("Durham",width=3,height=30,style="font-weight: bold; font-size: 13px"),
+              box("Manchester",width=3,height=30,style="font-weight: bold;font-size: 13px"),
+              box("Concord",width=3,height=30,style="font-weight: bold;font-size: 13px"),
             ),
-            
-            fluidRow("Manchester"),
-            
-            fluidRow("Concord (Law)"),
-            
-            fluidRow("Keene State"),
-            
-            fluidRow("Plymouth St.")
-          )
+            fluidRow(
+              box("Active Cases",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle"),
+              uiOutput("active_cases_durham"),
+              uiOutput("active_cases_manch"),
+              uiOutput("active_cases_concord")
+            ),
+            fluidRow(
+              box("Case Rate",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle"),
+              uiOutput("case_rates_durham"),
+              uiOutput("case_rates_manch"),
+              uiOutput("case_rates_concord")
+            ),
+            fluidRow(
+              box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle"),
+              uiOutput("pct_isol_durham"),
+              uiOutput("pct_isol_manch"),
+              uiOutput("pct_isol_concord")
+            ),
+            fluidRow(
+              box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle"),
+              uiOutput("pct_quar_durham"),
+              uiOutput("pct_quar_manch"),
+              uiOutput("pct_quar_concord")
+            )
+          ) # end box
+          ) # end div
         )# End column 2
       ),# END tabItem
+      
       ## Campus --------------------------------------------------------------------
       tabItem(
         tabName="campus", 
@@ -113,42 +129,51 @@ dashboardPage(
         
         ## START: lefthand column/box
         
-        column(width = 6,style = "background-color:#FFFFFF;",
-        #Gave a uniform white background to the column. Remove if needed
+        column(width = 6,
+               style = "background-color:#FFFFFF;", #Gave a uniform white background to the column. Remove if needed
+               height=NULL,
+               
           # epi curve - tabset box with tabs for different views
           fluidRow(
             tabBox(title = h5("Epidemic Curve"),
                    # The id lets us use input$tabset1 on the server to find the current tab
-                   id = "campus_epi_curve",width=NULL,height=240,
+                   id = "campus_epi_curve",
+                   width=NULL,
+                   height=240,
                    tabPanel("On / Off campus", plotOutput("location_plot",height=200)),
                    tabPanel("Student / Faculty", plotOutput("personnel_plot",height=200))
             )
             
-
             ),# end fluidRow
-              # TO DO: add in radio buttons to choose display view for epi curve
-            #)
-          #),#end right side column,
-          #column(width=6,
-          # numeric indicators
-        div(style = "font-size: 12px",##reducing font size to fit things in
-            fluidRow(
-            # TO DO: format these more nicely
-              uiOutput("n_isol_label"),
-            #),
-          #fluidRow(
-              uiOutput("n_quar"),
-            #),
-            #),
-            #fluidRow(
-              uiOutput("n_test"))
-             ),
-          # Dorm table 
-        div(style = "font-size: 13px; margin-top:-8em", ##reducing font size.
-            fluidRow(
-            dataTableOutput("mytable",height=50),width=NULL,height=70)
-                   
-            )
+
+        # numeric indicators
+        # TO DO: figure out how to remove gray bars?
+          fluidRow(
+            div(style = "font-size: 12px; margin-top:3em",
+                fluidRow(
+                # TO DO: format these more nicely
+                  uiOutput("n_isol_label"),
+                  uiOutput("n_quar_label"),
+                  uiOutput("n_test_label")
+                ),
+                fluidRow(
+                  uiOutput("n_isol_value"),
+                  uiOutput("n_quar_value"),
+                  uiOutput("n_test_value")
+                )
+              )
+          ), # end fluidRow
+        
+        
+        # Dorm table 
+          fluidRow(
+            div(style = "font-size: 13px; margin-top:1em", ##reducing font size.
+                fluidRow(
+                dataTableOutput("mytable",width=5.5, height=50),
+                width=6,
+                height=70)
+              )
+          ) # end fluidRow
           
           ),# END lefthand column
         #not many changes made in campus tab after this. Testing statistics column still pending. Need more

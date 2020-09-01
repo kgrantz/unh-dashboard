@@ -2,64 +2,192 @@
   
   function(input, output) {
     library(tidyverse)
+    library(DT)
+    library(htmltools)
+    
     #Sys.sleep(2)
     #waiter_hide()
     
     ## Home page -----------------------------------------------------------------
     # output$date_updated <- renderText({glue("Last updated: ", "{Sys.Date()}")}) # TO DO: update this with data load
     
-    # TO DO: replace this with function that builds epi curve for all data
-    
-    #Created a reactive dataset. Sometimes render functions work better with dynamic output
-    
+    ## EPI CURVE ---------
     data_random <- reactive({ 
       data.frame(x=sample(1:10),y=sample(1:10))
       
     })
     
-    
-    #plotting using reactive dataset
+    # TO DO: replace this with function that builds epi curve for all data
     output$epi_curve_total <- renderPlot({
       p = ggplot(data=data_random(), aes(x, y)) + geom_point()
       p
     })
     
     
+    ## STATEWIDE SITUATION ---------
     #randomly generates 3 numbers for state wide values
     random_numbers <- reactive({
       runif(2, min=0, max=100)
     })
     
     restriction <- reactive({
-    sample(c("limited opening","closed","open"),1)  
+    sample(c("Limited","Widespread","Open"),1)  
     })
-    
-    
-    
-    
-    # An idea to generate state wide boxes color coded on value using the randomly generated numbers above
+  
     #Number of Cases
-    output$state_case <- renderValueBox({valueBox(p(ceiling(random_numbers()[1])),"positive cases",
-                                                  width=4,
-                                                  color=ifelse(random_numbers()[1] > 50,"blue","yellow"),
-                                                  href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
+    output$state_case_label <- renderUI({box(
+      strong("Statewide Cases"), 
+      br(),
+      em("14-day total"),
+      width=4,
+      height=80
+    )})
+    
+    output$state_case <- renderUI({box(
+      ceiling(random_numbers()[1]),
+      width=4,
+      background=pick_color_threshold_numeric(random_numbers()[1], c(0, 5, 10, 100)),
+      href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
     )})
     
     #Hospitalization
-    output$hospitalization <- renderValueBox({valueBox(p(ceiling(random_numbers()[2])),"hospitalizations",
-                                                       width=4,
-                                                       color=ifelse(random_numbers()[2] > 50,"blue","yellow"),
-                                                       href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
+    output$hospitalization_label <- renderUI({box(
+      strong("Currently"),
+      strong("Hospitalized"),
+      width=4,
+      height=80
+    )})
+    
+    output$hospitalization <- renderUI({box(
+      ceiling(random_numbers()[2]),
+      width=4,
+      background=pick_color_threshold_numeric(random_numbers()[2], c(0, 5, 10, 100)),
+      href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
     )})
     
     
-    #Current Restrictions  
-    output$current_restrictions <- renderValueBox({valueBox(p(restriction()),"Current situation",
-                                                            width=4,
-                                                            color=ifelse(restriction()=="limited opening","lime",ifelse(restriction() == "open","orange","fuchsia")),
-                                                            href="https://www.covidguidance.nh.gov/"
+    #Current Restrictions
+    output$current_restrictions_label <- renderUI({box(
+      strong("Current"),
+      strong("Restrictions"),
+      width=4,
+      height=80
     )})
     
+    output$current_restrictions <- renderUI({box(
+      restriction(),
+      width=4,
+      background=ifelse(restriction()=="Open","green",ifelse(restriction() == "Limited","orange","red")),
+      href="https://www.covidguidance.nh.gov/"
+    )})
+    
+    
+    ## CAMPUS SITUATION ---------
+    
+      ## active cases
+      random_active_cases <- reactive({
+        sample(0:200, 3)
+      })
+  
+      output$active_cases_durham <- renderUI({box(
+        random_active_cases()[1],
+        width=3, 
+        height=80,
+        background=pick_color_threshold_numeric(random_active_cases()[1], c(0, 10, 50, 200))
+      )})
+      
+      output$active_cases_manch <- renderUI({box(
+        random_active_cases()[2],
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_active_cases()[2], c(0, 10, 50, 200))
+      )})
+      
+      output$active_cases_concord <- renderUI({box(
+        random_active_cases()[3],
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_active_cases()[3], c(0, 10, 50, 200))
+      )})
+      
+      ## case rates
+      random_case_rates <- reactive({
+        sample(0:200, 3)
+      })
+      
+      output$case_rates_durham <- renderUI({box(
+        glue("{random_case_rates()[1]} per 1000"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_case_rates()[1], c(0, 5, 100, 200))
+      )})
+      
+      output$case_rates_manch <- renderUI({box(
+        glue("{random_case_rates()[2]} per 1000"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_case_rates()[2], c(0, 5, 100, 200))
+      )})
+      
+      output$case_rates_concord <- renderUI({box(
+        glue("{random_case_rates()[3]} per 1000"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_case_rates()[3], c(0, 5, 100, 200))
+      )})
+      
+      ## pct isol
+      random_pct_isol <- reactive({
+        sample(0:100, 3)
+      })
+      
+      output$pct_isol_durham <- renderUI({box(
+        glue("{random_pct_isol()[1]}%"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_pct_isol()[1], c(0, 10, 50, 90))
+      )})
+      
+      output$pct_isol_manch <- renderUI({box(
+        glue("{random_pct_isol()[2]}%"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_pct_isol()[2], c(0, 10, 50, 90))
+      )})
+      
+      output$pct_isol_concord <- renderUI({box(
+        glue("{random_pct_isol()[3]}%"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_pct_isol()[3], c(0, 10, 50, 90))
+      )})
+      
+      ## pct quar
+      random_pct_quar <- reactive({
+        sample(0:100, 3)
+      })
+    
+      output$pct_quar_durham <- renderUI({box(
+        glue("{random_pct_quar()[1]}%"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_pct_quar()[1], c(0, 25, 50, 90))
+      )})
+      
+      output$pct_quar_manch <- renderUI({box(
+        glue("{random_pct_quar()[2]}%"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_pct_quar()[2], c(0, 25, 50, 90))
+      )})
+      
+      output$pct_quar_concord <- renderUI({box(
+        glue("{random_pct_quar()[3]}%"),
+        width=3,
+        height=80,
+        background=pick_color_threshold_numeric(random_pct_quar()[3], c(0, 25, 50, 90))
+      )})
+      
     ## UNH Campus Situation -------------------------------------------------------
     
     # TO DO: replace this with function that builds epi curve for selected campus
@@ -94,13 +222,11 @@
       ggplot(subset(campus_data, college==campus_opt() & id=="campus" ), aes(week_no, cases,fill=level)) +
         geom_bar(stat="identity") +
         labs(x="Week",y="Cases", title='Total new cases diagnosed per week on/off campus')+
-        scale_fill_manual(values=c('darkblue','cornflowerblue'))+
+        scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
         theme(axis.title.x=element_blank(),
               axis.text.x=element_text(angle=90),
-              axis.ticks.x=element_blank())
-      
-      
-      
+              axis.ticks.x=element_blank()) +
+        theme_bw()
       
     })
     
@@ -111,55 +237,67 @@
       ggplot(subset(campus_data, college==campus_opt() & id=="person"), aes(week_no, cases,fill=level)) +
         geom_bar(stat="identity") +
         labs(x="Week",y="Cases", title='Total new cases diagnosed per week among students and faculty')+
-        scale_fill_manual(values=c('darkblue','cornflowerblue'))+
+        scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
         theme(axis.title.x=element_blank(),
               axis.text.x=element_text(angle=90),
-              axis.ticks.x=element_blank())
-      
-      
-      
+              axis.ticks.x=element_blank()) +
+        theme_bw()
       
     })
     
     
-    
-    
-    #output$epi_curve_detail <- renderPlot({hist(rnorm(100), main="Epi Curve - Detailed", col="cornflowerblue")})
-    
-    # TO DO: calculate total under isolation for given input$campus. Getting these numbers from the column in dummy data
-    #Not sure if the write way to calculate
+    # TO DO: make sure calculation of number isolated matches final data format
     n_isol <- reactive({sum(subset(campus_data,college==campus_opt()) $isolation)})
     
-    # TO DO: calculate total under isolation + symptomatic for given input$campus
+    # TO DO: make sure calculation of number isolated + symptomatic matches final data format
     n_isol_sym <- reactive({sum(subset(campus_data,college==campus_opt()) $symptomatic)})
     
-    
-    # #quarantine
+    # TO DO: make sure calculation of number isolated + symptomatic matches final data format
     n_quar_no <-  reactive({sum(subset(campus_data,college==campus_opt()) $quarantine)})
-    
     
     ## don't know what this number is to put in dummy data. TO DO: Find out what this number is
     n_test_no <- 1
     
-    # creating pretty string with total isolated + symptomatic
-    # TO DO: add in tests to make sure these numbers are reasonable (e.g., sym <= total)
-    
-    #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
-    #other preferences
     output$n_isol_label <- renderUI({box(
-      strong("# active cases in isolation"),br(), em("Total  (symptomatic)"),
-      h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),width=4, height=100,solidHeader = TRUE,background="black")})
+      strong("# active cases in isolation"),
+      br(), 
+      em("Total (symptomatic)"),
+      width=4, 
+      height=80)})
     
-    output$n_quar <- renderUI({box(
-      strong("# of Durham quarantined"), br(), em("Total"),
-      h4(n_quar_no()),width=4,height=100,solidHeader = TRUE)})
+    output$n_isol_value <- renderUI({box(
+      h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),
+      width=4, 
+      height=60)})
     
-    output$n_test <- renderUI({box(
-      strong("Days from test to isolation"), br(), em("7-day median"),
-      h4(n_test_no),width=4,height=100,solidHeader = TRUE,background="orange")})
+    output$n_quar_label <- renderUI({box(
+      strong("# of Durham quarantined"), 
+      br(), 
+      em("Total"),
+      width=4,
+      height=80
+    )})
     
-    #hard coded this table. #TO find out what these numbers mean, create a dummy table for them
-    #difficult to create a subtitle in table header in shiny. TO DO: see if there is a way
+    output$n_quar_value <- renderUI({box(
+      h4(n_quar_no()),
+      width=4,
+      height=60)})
+    
+    output$n_test_label <- renderUI({box(
+      strong("Days from test to isolation"), 
+      br(), 
+      em("7-day median"),
+      width=4,
+      height=80)})
+    
+    output$n_test_value <- renderUI({box(
+      h4(n_test_no),
+      width=4,
+      height=60)})
+    
+    # TO DO: create function to process this data from whatever final format lab data takes
+    # will depend on campus_opt()
+    # (from Kyra) I'm not sure this needs to be datatable vs static form like kableExtra? formatting still needs work
     Dorm <- c("Dorm A","Dorm B","Off-campus")
     Positive_tests <- c(2,3,1)
     perc_positive <- c(0.02,0.07,0.01)
@@ -167,16 +305,30 @@
     
     Dorm_tab <- cbind(Dorm,Positive_tests,perc_positive,n_quart)
     
-    
-    colnames(Dorm_tab) <- c("Dorm","Positive tests","% Positivity", "# Quarantined")
-    
-    
-    
-    
-    
     #table out to UI
+    dorm_table = htmltools::withTags(table(
+      class = 'display',
+      thead(
+        tr(
+          th(rowspan = 2, "Dorm"),
+          th(colspan = 1, "Positive tests"),
+          th(colspan = 1, "% Positivity"),
+          th(colspan = 1, "# Quarantined")
+        ),
+        tr(
+          th("(14-day total)"),
+          th("(14-day average)"),
+          th("(% of all beds)")
+        )
+      )
+    ))
+    
     output$mytable = renderDataTable({
-      DT::datatable(Dorm_tab,options = list(dom="t"))
+      DT::datatable(
+        Dorm_tab,
+        options = list(dom="t"),
+        container = dorm_table
+      )
     })
     
     

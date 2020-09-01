@@ -37,3 +37,13 @@ print_under5 <- function(x){
     if(x==0){return("0")}
   }
 }
+
+# pick the color based on numeric level of cutoff
+pick_color_threshold_numeric <- function(value, 
+                                         thresholds, 
+                                         colors=c("green", "yellow", "orange", "red")){
+  return(colors[max(which(value > thresholds))])
+}
+  
+
+  
