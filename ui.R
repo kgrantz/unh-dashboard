@@ -176,42 +176,26 @@ dashboardPage(
                ) # end fluidRow
                
         ),# END lefthand column
-        #not many changes made in campus tab after this. Testing statistics column still pending. Need more
-        #details on this plot.
         
-        column(width=6,
-               ## START righthand column
-               fluidRow(
-                 # TO DO: add in testing figure; build in "tests not submitted" to ggplot object
-               ),
-               fluidRow(
-                 box(
-                   width=6,
-                   p("Median days from sample collection to test result day")
-                 ),
-                 box(
-                   width=2,
-                   status="primary",
-                   solidHeader = TRUE,
-                   title = "UNH"
-                   # TO DO: add in UNH sample dates
-                 ),
-                 box(
-                   width=2,
-                   status="primary",
-                   solidHeader = TRUE,
-                   title = "Quest"
-                   # TO DO: add in Quest testing delays
-                 ),
-                 box(
-                   width=2,
-                   status="primary",
-                   solidHeader = TRUE,
-                   title = "CMD"
-                   # TO DO: add in CMD testing delays
+        column(width=6, ## START righthand column
+               box(
+                 status="primary",
+                 width=NULL,
+                 solidHeader = TRUE,
+                 title = "Testing Statistics",
+                 plotOutput("testing_plot"), # TO DO: fix dimensions to server dimensions if needed
+                 br(),
+                 fluidRow(
+                     box(
+                       width=5,
+                       height=80,
+                       p("Median days from sample collection to test result day")
+                     ),
+                     renderUI("lab_unh_label"), # TO DO: these aren't displaying
+                     renderUI("lab_quest_label"),
+                     renderUI("lab_cmd_label")
                  )
-                 
-               )
+               ) # END box
         ) # END righthand column
         
       ) # END campus page
