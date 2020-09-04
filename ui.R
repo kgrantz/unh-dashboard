@@ -86,14 +86,14 @@ dashboardPage(
                 width=NULL,
                 solidHeader=TRUE,
                 title="College Operating Conditions",
-               div(style = "margin-top:0.04em;",
-                 fluidRow(
-                  box("",width=3,height=30, style="font-weight: bold",solidHeader=TRUE),
-                  box("Durham",width=3,height=30,style="font-weight: bold; font-size: 13px",solidHeader=TRUE),
-                  box("Manchester",width=3,height=30,style="font-weight: bold;font-size: 13px",solidHeader=TRUE),
-                  box("Concord",width=3,height=30,style="font-weight: bold;font-size: 13px",solidHeader=TRUE),
-                )
-                 ),
+                div(style = "margin-top:0.04em;",
+                    fluidRow(
+                      box("",width=3,height=30, style="font-weight: bold",solidHeader=TRUE),
+                      box("Durham",width=3,height=30,style="font-weight: bold; font-size: 13px",solidHeader=TRUE),
+                      box("Manchester",width=3,height=30,style="font-weight: bold;font-size: 13px",solidHeader=TRUE),
+                      box("Concord",width=3,height=30,style="font-weight: bold;font-size: 13px",solidHeader=TRUE),
+                    )
+                ),
                 fluidRow(
                   box("Active Cases",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("active_cases_durham"),
@@ -152,7 +152,7 @@ dashboardPage(
                
                # numeric indicators
                # TO DO: figure out how to remove gray bars?
-               div(style = "font-size: 12px; margin-top:-1em;",##reducing font size to fit things in
+               div(style = "font-size: 13px;",##reducing font size to fit things in
                    fluidRow(
                      uiOutput("n_isol_label"),
                      #),
@@ -169,7 +169,7 @@ dashboardPage(
                fluidRow(
                  div(style = "font-size: 12px;", ##reducing font size.
                      fluidRow(
-                       dataTableOutput("mytable", height=50),
+                       dataTableOutput("mytable"),
                        width=NULL,
                        height=70)
                  )
@@ -186,14 +186,15 @@ dashboardPage(
                  plotOutput("testing_plot"), # TO DO: fix dimensions to server dimensions if needed
                  br(),
                  fluidRow(
-                     box(
-                       width=6,
-                       height=80,
-                       p("Median days from sample collection to test result day")
-                     ),
-                     uiOutput("lab_unh_label"), # TO DO: these aren't displaying
-                     uiOutput("lab_quest_label"),
-                     uiOutput("lab_cmd_label")
+                   box(
+                     width=6,
+                     height=80,
+                     p("Median days from sample collection to test result day"),
+                     solidHeader=TRUE
+                   ),
+                   uiOutput("lab_unh_label"), # TO DO: these aren't displaying
+                   uiOutput("lab_quest_label"),
+                   uiOutput("lab_cmd_label")
                  )
                ) # END box
         ) # END righthand column
