@@ -269,41 +269,41 @@ function(input, output) {
   ## don't know what this number is to put in dummy data. TO DO: Find out what this number is
   n_test_no <- 1
   
- # output$n_isol_label <- renderUI({box(
+  # output$n_isol_label <- renderUI({box(
   #  strong("# active cases in isolation"),
-   # br(), 
-    #em("Total (symptomatic)"),
-    #width=4, 
-    #height=80)})
+  # br(), 
+  #em("Total (symptomatic)"),
+  #width=4, 
+  #height=80)})
   
   #output$n_isol_value <- renderUI({box(
-   # h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),
-    #width=4, 
-    #height=60)})
+  # h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),
+  #width=4, 
+  #height=60)})
   
   #output$n_quar_label <- renderUI({box(
-   # strong("# of Durham quarantined"), 
-    #br(), 
-    #em("Total"),
-    #width=4,
-    #height=80
+  # strong("# of Durham quarantined"), 
+  #br(), 
+  #em("Total"),
+  #width=4,
+  #height=80
   #)})
   
   #output$n_quar_value <- renderUI({box(
-   # h4(n_quar_no()),
-    #width=4,
-    #height=60)})
+  # h4(n_quar_no()),
+  #width=4,
+  #height=60)})
   
   #output$n_test_label <- renderUI({box(
-   # strong("Days from test to isolation"), 
-    #em("7-day median"),
-    #width=4,
-    #height=80)})
+  # strong("Days from test to isolation"), 
+  #em("7-day median"),
+  #width=4,
+  #height=80)})
   
   #output$n_test_value <- renderUI({box(
-   # h4(n_test_no),
+  # h4(n_test_no),
   #  width=4,
-   # height=60)})
+  # height=60)})
   
   
   #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
@@ -312,7 +312,8 @@ function(input, output) {
     strong("# active cases in isolation"),
     br(), 
     em("Total  (symptomatic)"),
-    h5(strong(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")"))),
+    br(),
+    h4(strong(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")"))),
     width=4, 
     height=80,
     solidHeader = TRUE)})
@@ -321,7 +322,8 @@ function(input, output) {
     strong("# of Durham quarantined"), 
     br(), 
     em("Total"),
-    h5(strong(n_quar_no())),
+    br(),
+    h4(strong(n_quar_no())),
     width=4,
     height=80,
     solidHeader = TRUE)})
@@ -330,7 +332,8 @@ function(input, output) {
     strong("Days from test to isolation"), 
     br(), 
     em("7-day median"),
-    h5(strong(n_test_no)),
+    br(),
+    h4(strong(n_test_no)),
     width=4,
     height=80,
     solidHeader = TRUE)})
@@ -388,13 +391,13 @@ function(input, output) {
   test_data$test_type <- factor(test_data$test_type, levels=c("Pending", "Negative", "Positive"))
   
   pct_pos <- test_data %>% 
-             group_by(date) %>% 
-             summarise(n_pos = n_test[which(test_type=="Positive")],
-                       n_neg = n_test[which(test_type=="Negative")],
-                       n_tot = sum(n_test),
-                       n_not_subm = round(n_tot*0.1),
-                       pct_pos = n_pos/ (n_pos + n_neg),
-                       pct_pos_label = glue("{round(pct_pos*100,1)}%"))
+    group_by(date) %>% 
+    summarise(n_pos = n_test[which(test_type=="Positive")],
+              n_neg = n_test[which(test_type=="Negative")],
+              n_tot = sum(n_test),
+              n_not_subm = round(n_tot*0.1),
+              pct_pos = n_pos/ (n_pos + n_neg),
+              pct_pos_label = glue("{round(pct_pos*100,1)}%"))
   
   output$testing_plot <- renderPlot({
     
@@ -402,39 +405,39 @@ function(input, output) {
     date_breaks = unique(test_data$date)
     
     gtest <- ggplot() +
-              geom_bar(data=test_data, aes(x=date, y=n_test, fill=test_type), stat="identity") +
-              scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
-              scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d", limits = date_limits) +
-              scale_y_continuous(name="") +
-              theme_minimal() +
-              theme(axis.ticks.x=element_blank(),
-                    legend.position = "top")
+      geom_bar(data=test_data, aes(x=date, y=n_test, fill=test_type), stat="identity") +
+      scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d", limits = date_limits) +
+      scale_y_continuous(name="") +
+      theme_minimal() +
+      theme(axis.ticks.x=element_blank(),
+            legend.position = "top")
     
     glabel <- ggplot(pct_pos) +
-               geom_text(aes(x=date, y=5, label=pct_pos_label)) +
-               geom_text(aes(x=date, y=10, label=n_not_subm)) +
-               geom_text(aes(x=date, y=15, label=n_tot)) +
-               scale_x_date(name="", limits = date_limits) +
-               scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
-               theme_minimal() +
-               theme(
-                  panel.grid.major = element_blank(), 
-                  panel.grid.minor = element_blank(),
-                  panel.border = element_blank(),
-                  axis.line = element_blank(),
-                  axis.text.x = element_blank(),
-                  axis.text.y = element_text(size=11),
-                  axis.ticks = element_blank(),
-                  axis.title.x = element_blank(),
-                  axis.title.y = element_blank(),
-                  plot.title = element_blank()
-               )
+      geom_text(aes(x=date, y=5, label=pct_pos_label)) +
+      geom_text(aes(x=date, y=10, label=n_not_subm)) +
+      geom_text(aes(x=date, y=15, label=n_tot)) +
+      scale_x_date(name="", limits = date_limits) +
+      scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
+      theme_minimal() +
+      theme(
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=11),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_blank()
+      )
     
     glabel <- ggplot_gtable(ggplot_build(glabel))
     gtest <- ggplot_gtable(ggplot_build(gtest))
     gtest$widths <-glabel$widths 
     
-    grid.arrange(gtest, glabel, heights=c(10, 3))
+    grid.arrange(gtest, glabel, heights=c(7, 3))
     
   })
   
@@ -450,7 +453,7 @@ function(input, output) {
     width=2, 
     height=80,
     solidHeader = TRUE
-    )})
+  )})
   
   output$lab_quest_label <- renderUI({box(
     h4(random_delays()[2]),
@@ -458,7 +461,7 @@ function(input, output) {
     width=2, 
     height=80,
     solidHeader = TRUE
-    )})
+  )})
   
   output$lab_cmd_label <- renderUI({box(
     h4(random_delays()[3]),
@@ -466,7 +469,7 @@ function(input, output) {
     width=2, 
     height=80,
     solidHeader = TRUE
-    )})
+  )})
   
   
 }
