@@ -187,13 +187,13 @@ dashboardPage(
                  br(),
                  fluidRow(
                      box(
-                       width=5,
+                       width=6,
                        height=80,
                        p("Median days from sample collection to test result day")
                      ),
-                     renderUI("lab_unh_label"), # TO DO: these aren't displaying
-                     renderUI("lab_quest_label"),
-                     renderUI("lab_cmd_label")
+                     uiOutput("lab_unh_label"), # TO DO: these aren't displaying
+                     uiOutput("lab_quest_label"),
+                     uiOutput("lab_cmd_label")
                  )
                ) # END box
         ) # END righthand column

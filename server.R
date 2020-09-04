@@ -441,29 +441,32 @@ function(input, output) {
   
   ## Lab delay labels
   random_delays <- reactive({
-    sample(0:14, 3, replace=TRUE)
+    ceiling(runif(3, min=0, max=14))
   })
   
   output$lab_unh_label <- renderUI({box(
-    h5(random_delays[1]),
+    h4(random_delays()[1]),
     em("UNH"),
-    width=3, 
+    width=2, 
     height=80,
-    solidHeader = TRUE)})
+    solidHeader = TRUE
+    )})
   
   output$lab_quest_label <- renderUI({box(
-    h5(random_delays[2]),
+    h4(random_delays()[2]),
     em("Quest"),
-    width=3, 
+    width=2, 
     height=80,
-    solidHeader = TRUE)})
+    solidHeader = TRUE
+    )})
   
   output$lab_cmd_label <- renderUI({box(
-    h5(random_delays[3]),
+    h4(random_delays()[3]),
     em("CMD"),
-    width=3, 
+    width=2, 
     height=80,
-    solidHeader = TRUE)})
+    solidHeader = TRUE
+    )})
   
   
 }
