@@ -21,7 +21,7 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv")
     # use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
     # metrics = # new positive cases
 
-  # statewide conditions  ----- SOWMYA
+  # statewide conditions 
     # manually enter into a named vector with 14-day total incident cases, currently hospitalized, current restrictions, date updated
     # figure out if we can api in DHHS data?
   
