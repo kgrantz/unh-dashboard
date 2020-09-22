@@ -61,7 +61,7 @@ library(tidyverse)
     # % all beds occupied
     # TO DO: decide if this is best "% positive" metric or want something different
     
-  # testing "epi curve"
+  # testing "epi curve" ------------------------FORREST
     # data frame -- DAY LEVEL for plot
     # column campus
     # column date (day) -- date of results (fill in with date of collection where date of result is not needed)
