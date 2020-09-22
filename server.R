@@ -6,6 +6,14 @@ function(input, output) {
   library(htmltools)
   library(gridExtra)
   
+  
+  # TO DO: add in ability to scroll back on date
+  # possible_dates <- dir("data/")
+  # finds the maximum date to be "current_data"
+  # displays all possible dates in dropdown menu in sidebar, defaults to current_data
+  # if user selects some other date, load in Rdata from that directory
+  # otherwise read in data from "current_data" directory
+  
   #Sys.sleep(2)
   #waiter_hide()
   
@@ -85,6 +93,7 @@ function(input, output) {
     href="https://www.covidguidance.nh.gov/"
   )})
   
+  # TO DO: add in small text date at which statewide conditions were updated
   
   ## CAMPUS SITUATION ---------
   
@@ -258,6 +267,7 @@ function(input, output) {
   
   
   # TO DO: make sure calculation of number isolated matches final data format
+  # TO DO -- CHANGE THIS TO DIFFERENT OBJECT to pull isolation numbers
   n_isol <- reactive({sum(subset(campus_data,college==campus_opt()) $isolation)})
   
   # TO DO: make sure calculation of number isolated + symptomatic matches final data format
@@ -383,6 +393,7 @@ function(input, output) {
   ## Lab Testing --------------------------------------------------------
   
   ## Lab testing plot/numbers
+  # TO DO (lower priority) -- add hover to the plot for the daily counts of each category
   test_data <- data.frame(date = as.Date(rep(c("2020-06-23", "2020-06-29", "2020-07-06", 
                                                "2020-07-13", "2020-07-20", "2020-07-27", 
                                                "2020-08-03"), each=3)),
