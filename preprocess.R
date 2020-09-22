@@ -16,12 +16,12 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv")
   ### HOME PAGE ###
   #################
 
-  # overall epi curve:
+  # overall epi curve:  ------ SOWMYA
     # week should be collection date where available, results date where collection date isn't available
     # use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
     # metrics = # new positive cases
 
-  # statewide conditions
+  # statewide conditions  ----- SOWMYA
     # manually enter into a named vector with 14-day total incident cases, currently hospitalized, current restrictions, date updated
     # figure out if we can api in DHHS data?
   
@@ -42,7 +42,7 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv")
   ### CAMPUS PAGE ###
   ###################
   
-  # campus epi curve
+  # campus epi curve --- SOWMYA
     # columns: week, var_type, var_level, count
     # week should be collection date where available, results date where collection date isn't available
     # use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
@@ -53,7 +53,8 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv")
     # can add other metrics but not currently used in dashboard:
         # newly isolated, # newly quarantined, average # in isolation, average # quarantined, total # tested
     
-  # campus specific numbers come from the thresholds data
+  # campus specific numbers come from the thresholds data 
+     
   
   # dorm-specific table for each campus
     #data frame with cumulative counts
