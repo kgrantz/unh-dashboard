@@ -56,7 +56,7 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv")
   # campus specific numbers come from the thresholds data 
      
   
-  # dorm-specific table for each campus
+  # dorm-specific table for each campus ------FORREST
     #data frame with cumulative counts
     # column campus
     # column dorms (with off campus) -- intersection of (off_campus, campus)
