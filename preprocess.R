@@ -70,6 +70,68 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
     # % all beds occupied
     # TO DO: decide if this is best "% positive" metric or want something different
     
+  # student/faculty-specific table for each campus ------FORREST
+  #data frame with cumulative counts
+  # column campus
+  # column user_status
+  # column incident cases (new positive tests) in last 14 days
+  # column % positive (# incident cases / # with at least one test result (positive/negative) in last 14 weeks) 
+  # # quarantined
+  # % all beds occupied
+  # TO DO: decide if this is best "% positive" metric or want something different
+
+#cases testing positive in the last 14 days
+cases14 <- routinetesting %>% filter(result=="Positive") %>%
+  left_join(individualdemographics) %>%
+  #change the date
+  mutate(date=ifelse(is.na(resultsdate),
+                     as.character(collectdate),
+                     as.character(resultsdate))) %>%
+  mutate(date=as.Date(date)) %>%
+  #only include those conducted in the last two weeks
+  filter(date > (Sys.Date()-14)) %>%
+  filter(date <= Sys.Date())
+
+
+# those who are quarantined at the moment
+quarantined <- isolationquarantine %>% 
+  #limit to those which have an entry date before
+  filter(quar_entrydate<=Sys.Date()) %>%
+  #limit to those who have an exit day after
+  filter(quar_exitdate>Sys.Date()) %>%
+  distinct(uid)
+
+
+# number of people who are being tested (should this be our denominator???)
+censussf <- distinct(individualdemographics,uid,campus,user_status) %>%
+  group_by(campus,user_status) %>%
+  summarize(pop=n()) 
+
+# number of those quarantined by each campus / user status
+quarsf <- quarantined %>% left_join(individualdemographics) %>%
+  group_by(campus,user_status) %>%
+  summarize(quarantined=n())
+
+#final table for student faculty
+studentfaculty <- cases14 %>%
+  #remove any cases that show up twice with multiple tests
+  distinct(uid,campus,user_status)%>%
+  group_by(campus,user_status) %>%
+  summarize(cases=n()) %>%
+  #include the zeroes
+  full_join(censussf) %>%
+  filter(campus %in% c("UNH Durham","UNH LAW",
+                       "UNH Manchester"
+  ))%>%
+  filter(!is.na(user_status))%>%
+  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
+  #calculate rate per 1000
+  mutate(rate=cases/pop*1000)%>%
+  #add the number of people quarantined
+  left_join(quarsf) %>%
+  mutate(quarantined=ifelse(is.na(quarantined),
+                            0,quarantined)) 
+
   # testing "epi curve" ------------------------FORREST
     # data frame -- DAY LEVEL for plot
     # column campus
@@ -114,9 +176,6 @@ tecCampusfinal <- tecCampus1 %>%
                                                        result=unique(tecCampus1$result))) %>%
                   mutate(tests=ifelse(is.na(tests),0,tests))
 
-
-
-    
   
   # data frame -- WEEK LEVEL for table
   # summarize the daily table by week to produce columns:
