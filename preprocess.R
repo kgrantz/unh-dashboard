@@ -74,6 +74,44 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv")
         ## TO DO -- figure out what all the levels mean -- e.g. is inconclusive "pending"?
         ## for now keep the levels they've provided until we figure out which ones can be merged together
     # column count -- number in each category
+
+tecCampus1 <- routinetesting %>% left_join(individualdemographics) %>%
+  mutate(date=ifelse(is.na(resultsdate),
+                     as.character(collectdate),
+                     as.character(resultsdate))) %>%
+  mutate(date=as.Date(date))%>%
+  #recode the results
+  mutate(result=recode(result,
+                       Invalid = "Invalid / Rejected / Not Performed",
+                       Rejected = "Invalid / Rejected / Not Performed",
+                       `Test Not Performed` = "Invalid / Rejected / Not Performed",
+                       `No Result` = "Invalid / Rejected / Not Performed",
+                       `Inconclusive`="Inconclusive",
+                       Positive= "Positive",
+                       Negative="Negative",
+                       .default=NA_character_
+  )) %>%
+  #remove those with missing or free text responses or inconclusive
+  filter(!is.na(result)) %>%
+  #remove those not on UNH Durham, Manchester or Law
+  filter(campus %in% c("UNH Manchester","UNH Durham","UNH LAW")) %>%
+  #only include those conducted in the last two weeks
+  filter(date > (Sys.Date()-14)) %>%
+  filter(date <= Sys.Date()) %>%
+  group_by(campus, date,result) %>%
+  summarize(tests=n())
+
+
+tecCampusfinal <- tecCampus1 %>%
+                  #add zeroes to days missing for each category
+                  full_join(expand_grid(campus=unique(tecCampus1$campus),
+                                                       date=seq.Date(min(tecCampus1$date),
+                                                                     Sys.Date(),by="days"),
+                                                       result=unique(tecCampus1$result))) %>%
+                  mutate(tests=ifelse(is.na(tests),0,tests))
+
+
+
     
   
   # data frame -- WEEK LEVEL for table
