@@ -3,7 +3,11 @@ library(tidyverse)
 ## Load Data (USE THESE R OBJECT NAMES!)
 routinetesting<- read_csv("raw_data/routinetesting.csv")
 isolationquarantine<-read_csv("raw_data/isolationquarantine.csv")
-individualdemographics <- read_csv("raw_data/individualdemographics.csv") 
+individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
+  mutate(user_status=recode(user_status,
+                            Employee="Employee / Staff",
+                            Staff="Employee / Staff"                      
+  ))
 
 ## Helper strings --------------- 
 
