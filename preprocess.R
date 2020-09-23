@@ -1,7 +1,25 @@
 library(tidyverse)
 
 ## Load Data (USE THESE R OBJECT NAMES!)
-routinetesting<- read_csv("raw_data/routinetesting.csv")
+
+#loading routinetesting and coalescing as (resultdate/collectdate)
+routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
+  mutate(date=ifelse(is.na(resultsdate),
+                     as.character(collectdate),
+                     as.character(resultsdate))) %>%
+  mutate(date=as.Date(date))%>%
+  #recode the results
+  mutate(result=recode(result,
+                       Invalid = "Invalid / Rejected / Not Performed",
+                       Rejected = "Invalid / Rejected / Not Performed",
+                       `Test Not Performed` = "Invalid / Rejected / Not Performed",
+                       `No Result` = "Invalid / Rejected / Not Performed",
+                       `Inconclusive`="Inconclusive",
+                       Positive= "Positive",
+                       Negative="Negative",
+                       .default=NA_character_
+  ))
+
 isolationquarantine<-read_csv("raw_data/isolationquarantine.csv")
 individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
   mutate(user_status=recode(user_status,
@@ -142,21 +160,6 @@ studentfaculty <- cases14 %>%
     # column count -- number in each category
 
 tecCampus1 <- routinetesting %>% left_join(individualdemographics) %>%
-  mutate(date=ifelse(is.na(resultsdate),
-                     as.character(collectdate),
-                     as.character(resultsdate))) %>%
-  mutate(date=as.Date(date))%>%
-  #recode the results
-  mutate(result=recode(result,
-                       Invalid = "Invalid / Rejected / Not Performed",
-                       Rejected = "Invalid / Rejected / Not Performed",
-                       `Test Not Performed` = "Invalid / Rejected / Not Performed",
-                       `No Result` = "Invalid / Rejected / Not Performed",
-                       `Inconclusive`="Inconclusive",
-                       Positive= "Positive",
-                       Negative="Negative",
-                       .default=NA_character_
-  )) %>%
   #remove those with missing or free text responses or inconclusive
   filter(!is.na(result)) %>%
   #remove those not on UNH Durham, Manchester or Law
