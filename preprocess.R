@@ -258,6 +258,34 @@ studentfaculty <- cases10 %>%
   mutate(quarantined=ifelse(is.na(quarantined),
                             0,quarantined)) 
 
+
+
+
+#final table for threshold dataframe
+threshdf <- cases10 %>%
+  #remove any cases that show up twice with multiple tests
+  distinct(uid,campus)%>%
+  group_by(campus) %>%
+  summarize(cases=n()) %>%
+  #include the zeroes
+  full_join(census) %>%
+  filter(campus %in% c("UNH Durham","UNH LAW",
+                       "UNH Manchester"
+  ))%>%
+  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
+  #calculate rate per 1000
+  mutate(rate=cases/pop*1000)%>%
+  #add the number of people quarantined/ isolated
+  left_join(quardf) %>%
+  mutate(quarantined=ifelse(is.na(quarantined),
+                            0,quarantined)) %>%
+  left_join(isodf) %>%
+  mutate(isolated=ifelse(is.na(isolated),
+                         0,isolated)) %>%
+  select(-pop)
+
+
+
 ### Testing epi curve ------------------------------- 
 ### FORREST
 # data frame -- DAY LEVEL for plot
