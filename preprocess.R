@@ -34,7 +34,11 @@
                             mutate(user_status=recode(user_status,
                                                       Employee="Employee / Staff",
                                                       Staff="Employee / Staff"                      
-                            ))
+                            )) %>%
+                            ##defining column campus location as its not explicitly defined
+                            mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus"))
+
+
 
 
 #### HOME PAGE ---------------------------------- ####
