@@ -399,21 +399,21 @@ function(input, output) {
     ceiling(runif(3, min=0, max=14))
   })
   
-  output$lab_unh_label <- renderUI({box(
-    h4(random_delays()[1]),
-    em("UNH"),
-    width=2, 
-    height=80,
-    solidHeader = TRUE
-  )})
-  
-  output$lab_quest_label <- renderUI({box(
-    h4(random_delays()[2]),
-    em("Quest"),
-    width=2, 
-    height=80,
-    solidHeader = TRUE
-  )})
+  # output$lab_unh_label <- renderUI({box(
+  #   h4(random_delays()[1]),
+  #   em("UNH"),
+  #   width=2, 
+  #   height=80,
+  #   solidHeader = TRUE
+  # )})
+  # 
+  # output$lab_quest_label <- renderUI({box(
+  #   h4(random_delays()[2]),
+  #   em("Quest"),
+  #   width=2, 
+  #   height=80,
+  #   solidHeader = TRUE
+  # )})
   
   output$lab_cmd_label <- renderUI({box(
     h4(random_delays()[3]),
