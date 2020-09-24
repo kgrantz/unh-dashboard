@@ -12,9 +12,9 @@ state.updated.date <- as.Date("2020-09-23")
 # change this to character string if you do not update the state data
 
 routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
-  mutate(date=ifelse(is.na(resultsdate),
-                     as.character(collectdate),
-                     as.character(resultsdate))) %>%
+  mutate(date=ifelse(is.na(collectdate),
+                     as.character(resultsdate),
+                     as.character(collectdate))) %>%
   mutate(date=as.Date(date))%>%
   # recode the results
   mutate(result=recode(result,
@@ -33,7 +33,8 @@ isolationquarantine <- read_csv("raw_data/isolationquarantine.csv")
 individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
   mutate(user_status=recode(user_status,
                             Employee="Employee / Staff",
-                            Staff="Employee / Staff"                      
+                            Staff="Employee / Staff",
+                            Unknown="Employee / Staff" ## per call 9/24, these are mostly contractors
   )) %>%
   ##defining column campus location as its not explicitly defined
   mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus"))
@@ -211,9 +212,9 @@ cases10 <- routinetesting %>%
   filter(result=="Positive") %>%
   left_join(individualdemographics) %>%
   #change the date
-  mutate(date=ifelse(is.na(resultsdate),
-                     as.character(collectdate),
-                     as.character(resultsdate))) %>%
+  mutate(date=ifelse(is.na(collectdate),
+                            as.character(resultsdate),
+                            as.character(collectdate))) %>%
   mutate(date=as.Date(date)) %>%
   #only include those conducted in the last two weeks
   filter(date > (Sys.Date()-10)) %>%
