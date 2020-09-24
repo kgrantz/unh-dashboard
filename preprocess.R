@@ -106,7 +106,79 @@ epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
     # A on_off on   a
     # A on_off off  b
     # can add other metrics but not currently used in dashboard:
-        # newly isolated, # newly quarantined, average # in isolation, average # quarantined, total # tested
+    # newly isolated, # newly quarantined, average # in isolation, average # quarantined, total # tested
+
+   ##merging routine testing and demo table for additional info
+routinetesting_w_week_demo <- routinetesting_w_week %>%
+                              left_join(individualdemographics, by="uid")
+                          
+
+
+##table skeleton for campus curve
+##we need to create table skeleton
+##to keep rows with 0 cases when there is no information for any combination
+##I know it looks like a tedious way to do it but its economic in case we
+# get more levels
+
+##check with Kyra and Forrest which campuses to keep
+campus <- data.frame(campus= unique(individualdemographics$campus))
+
+#personnel column unique values
+personnel <- data.frame(user_status = c("Student","Faculty"))
+
+#campus location column unique values
+campus_location <- data.frame(campus_location=c("Off Campus","On Campus"))
+
+#weeks column unique values
+weeks <- data.frame(week_no=cont_week)
+
+#for campus location tab; cross join everything to get all required combinations. Then make a level column
+
+table_levels_campus <- merge(campus,campus_location) %>%
+                       merge(weeks)%>%
+                       mutate(level=campus_location, id="campus_location")
+
+
+##TO DO : in dashboard server, change the filters for campus and campus location
+
+##rolling up date level data to required levels
+routinetesting_campus_location<- routinetesting_w_week_demo[ ,c("result","week_no","campus","campus_location")] %>%
+                                 group_by(week_no, campus,campus_location) %>%
+                                 ## cases = count of positive results
+                                 summarise(cases = sum(result == "Positive"))%>%
+                                 ##getting all the levels missed by roll up not having any data
+                                 right_join(table_levels_campus) %>%
+                                 ## replacing NA with 0 - later check why we have NAs if present in raw data
+                                 mutate(cases=ifelse(is.na(cases),0,cases)) %>%
+                                 mutate(week_start_date=get_date(week_no, start=7))
+
+
+
+
+#for personnel location tab; cross join everything to get all required combinations. Then make a level column
+table_levels_user <- merge(campus,personnel) %>%
+                     merge(weeks)%>%
+                     mutate(level=user_status, id="user_status")
+
+
+
+##rolling up date level data to required levels
+routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status")] %>%
+                                  group_by(week_no, campus,user_status) %>%
+                                  ## cases = count of positive results
+                                  summarise(cases = sum(result == "Positive"))%>%
+                                  right_join(table_levels_user) %>%
+                                  ## replacing NA with 0 - later check why we have NAs
+                                  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
+                                  mutate(week_start_date=get_date(week_no, start=7))
+
+
+
+#row bind the data of different tabs. We can instead have these as 2 datasets also
+#final table for epi curve 
+routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("campus","id","level","week_no","week_start_date","cases")],
+                                            routinetesting_campus_personnel[ ,c("campus","id","level","week_no","week_start_date","cases")])
+
     
   # campus specific numbers come from the thresholds data 
      
