@@ -43,6 +43,21 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
     # use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
     # metrics = # new positive cases
 
+   ## adding week number and week start date for date
+routinetesting_w_week <- routinetesting %>%
+                         ##used aweek package instead because EpiWeeks has been decommissioned from CRAN
+                         mutate(week_no = date2week(date, week_start=7, floor_day=TRUE, numeric=TRUE)) %>%
+                         mutate(week_start_date=get_date(week_no, start=7))
+
+## rolling up to week level
+epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
+                          group_by(week_no) %>%
+                          ## cases = count of positive results
+                          summarise(cases = sum(result == "Positive")) %>%
+                          ## replacing NA with 0 - later check why we have NAs
+                          mutate(cases=ifelse(is.na(cases),0,cases))
+
+
   # statewide conditions 
     # manually enter into a named vector with 14-day total incident cases, currently hospitalized, current restrictions, date updated
     # figure out if we can api in DHHS data?
