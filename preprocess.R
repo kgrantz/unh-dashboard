@@ -43,19 +43,37 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
     # use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
     # metrics = # new positive cases
 
-   ## adding week number and week start date for date
+ ## adding week number and week start date for date
 routinetesting_w_week <- routinetesting %>%
-                         ##used aweek package instead because EpiWeeks has been decommissioned from CRAN
-                         mutate(week_no = date2week(date, week_start=7, floor_day=TRUE, numeric=TRUE)) %>%
-                         mutate(week_start_date=get_date(week_no, start=7))
+                         mutate(week_no = date2week(date, week_start=7, floor_day=TRUE, numeric=TRUE))
+
+
+#getting a continuous string of weeks
+#from min week available
+#to max week available
+#to include rows with 0 where there are no week values
+
+      min_week <- min(routinetesting_w_week$week_no)
+      max_week <- max(routinetesting_w_week$week_no)
+      cont_week <- data.frame(week_no = seq(min_week, max_week, 1))
+
+
+
 
 ## rolling up to week level
 epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
                           group_by(week_no) %>%
                           ## cases = count of positive results
                           summarise(cases = sum(result == "Positive")) %>%
+                          right_join(cont_week) %>%
                           ## replacing NA with 0 - later check why we have NAs
-                          mutate(cases=ifelse(is.na(cases),0,cases))
+                          mutate(cases=ifelse(is.na(cases),0,cases)) %>%
+                          mutate(week_start_date=get_date(week_no, start=7))
+                          
+
+
+
+
 
 
   # statewide conditions 
