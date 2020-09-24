@@ -7,6 +7,10 @@ function(input, output) {
   library(gridExtra)
   
   
+  filename <- paste0("data/",Sys.Date(),"/processed_data.Rdata")
+  
+  load(filename)
+  
   # TO DO: add in ability to scroll back on date
   # possible_dates <- dir("data/")
   # finds the maximum date to be "current_data"
@@ -28,7 +32,13 @@ function(input, output) {
   
   # TO DO: replace this with function that builds epi curve for all data
   output$epi_curve_total <- renderPlot({
-    p = ggplot(data=data_random(), aes(x, y)) + geom_point()
+    p = ggplot(epi_curve_overall_week, aes(week_no, cases)) +
+      geom_bar(stat="identity") +
+      labs(x="Week",y="Cases", title='Total new cases diagnosed per week')+
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_text(angle=90),
+            axis.ticks.x=element_blank()) +
+      theme_bw()
     p
   })
   
@@ -215,7 +225,7 @@ function(input, output) {
   
   #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
   output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
-                                                   choices = c("Durham","Concord"), 
+                                                   choices = c(unique(tecCampusfinal$campus)), 
                                                    selected = "Durham")
   )
   
@@ -386,41 +396,30 @@ function(input, output) {
   
   ## Lab testing plot/numbers
   # TO DO (lower priority) -- add hover to the plot for the daily counts of each category
-  test_data <- data.frame(date = as.Date(rep(c("2020-06-23", "2020-06-29", "2020-07-06", 
-                                               "2020-07-13", "2020-07-20", "2020-07-27", 
-                                               "2020-08-03"), each=3)),
-                          test_type = rep(c("Pending", "Negative", "Positive"), times=7),
-                          n_test = sample(1:100, 21, replace=TRUE))
-  test_data$test_type <- factor(test_data$test_type, levels=c("Pending", "Negative", "Positive"))
   
-  pct_pos <- test_data %>% 
-    group_by(date) %>% 
-    summarise(n_pos = n_test[which(test_type=="Positive")],
-              n_neg = n_test[which(test_type=="Negative")],
-              n_tot = sum(n_test),
-              n_not_subm = round(n_tot*0.1),
-              pct_pos = n_pos/ (n_pos + n_neg),
-              pct_pos_label = glue("{round(pct_pos*100,1)}%"))
+  tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
+  
+
   
   output$testing_plot <- renderPlot({
     
-    date_limits <- c(min(test_data$date)-6, max(test_data$date)+6)
-    date_breaks = unique(test_data$date)
+    date_limits <- c(min(tecCampusfinal$date)-6, max(tecCampusfinal$date)+6)
+    date_breaks = unique(tecCampusfinal$date)
     
     gtest <- ggplot() +
-      geom_bar(data=test_data, aes(x=date, y=n_test, fill=test_type), stat="identity") +
+      geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity") +
       scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d", limits = date_limits) +
       scale_y_continuous(name="") +
       theme_minimal() +
       theme(axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=90),
             legend.position = "top")
     
-    glabel <- ggplot(pct_pos) +
-      geom_text(aes(x=date, y=5, label=pct_pos_label)) +
-      geom_text(aes(x=date, y=10, label=n_not_subm)) +
-      geom_text(aes(x=date, y=15, label=n_tot)) +
-      scale_x_date(name="", limits = date_limits) +
+    glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
+      geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
+      geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
+      geom_text(aes(x=week_no, y=15, label=n_tot)) +
       scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
       theme_minimal() +
       theme(
