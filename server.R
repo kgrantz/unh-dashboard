@@ -34,27 +34,19 @@ function(input, output) {
   
   
   ## STATEWIDE SITUATION ---------
-  #randomly generates 3 numbers for state wide values
-  random_numbers <- reactive({
-    runif(2, min=0, max=100)
-  })
-  
-  restriction <- reactive({
-    sample(c("Limited","Widespread","Open"),1)  
-  })
   
   #Number of Cases
   output$state_case_label <- renderUI({box(
     strong("Statewide Cases"), 
     br(),
-    em("14-day total"),
+    em("Current Infections"),
     width=4,
     height=40,
     solidHeader=TRUE
   )})
   
   output$state_case <- renderUI({box(
-    ceiling(random_numbers()[1]),
+    state_curr_cases,
     width=4,
     background=pick_color_threshold_numeric(random_numbers()[1], c(0, 5, 10, 100)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
@@ -62,7 +54,7 @@ function(input, output) {
   
   #Hospitalization
   output$hospitalization_label <- renderUI({box(
-    strong("Currently"),
+    strong("Statewide Currently"),
     strong("Hospitalized"),
     width=4,
     height=40,
@@ -70,7 +62,7 @@ function(input, output) {
   )})
   
   output$hospitalization <- renderUI({box(
-    ceiling(random_numbers()[2]),
+    state_curr_hosp,
     width=4,
     background=pick_color_threshold_numeric(random_numbers()[2], c(0, 5, 10, 100)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
@@ -87,7 +79,7 @@ function(input, output) {
   )})
   
   output$current_restrictions <- renderUI({box(
-    restriction(),
+    state_curr_cond,
     width=4,
     background=ifelse(restriction()=="Open","green",ifelse(restriction() == "Limited","orange","red")),
     href="https://www.covidguidance.nh.gov/"
