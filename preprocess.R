@@ -188,8 +188,8 @@ routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("
 # data frame with cumulative counts
 #   column campus
 #   column dorms (with off campus) -- intersection of (off_campus, campus)
-#   column incident cases (new positive tests) in last 14 days
-#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 14 weeks) 
+#   column incident cases (new positive tests) in last 10 days
+#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 days) 
 #   # quarantined
 #   % all beds occupied
 # TO DO: decide if this is best "% positive" metric or want something different
@@ -200,14 +200,14 @@ routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("
 # data frame with cumulative counts
 #   column campus
 #   column user_status
-#   column incident cases (new positive tests) in last 14 days
-#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 14 weeks) 
+#   column incident cases (new positive tests) in last 10 days
+#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 weeks) 
 #   # quarantined
 #   % all beds occupied
 # TO DO: decide if this is best "% positive" metric or want something different
 
-# Cases testing positive in the last 14 days
-cases14 <- routinetesting %>% 
+# Cases testing positive in the last 10 days
+cases10 <- routinetesting %>% 
   filter(result=="Positive") %>%
   left_join(individualdemographics) %>%
   #change the date
@@ -216,7 +216,7 @@ cases14 <- routinetesting %>%
                      as.character(resultsdate))) %>%
   mutate(date=as.Date(date)) %>%
   #only include those conducted in the last two weeks
-  filter(date > (Sys.Date()-14)) %>%
+  filter(date > (Sys.Date()-10)) %>%
   filter(date <= Sys.Date())
 
 # Currently quarantined
@@ -238,7 +238,7 @@ quarsf <- quarantined %>% left_join(individualdemographics) %>%
   summarize(quarantined=n())
 
 # final table for student faculty
-studentfaculty <- cases14 %>%
+studentfaculty <- cases10 %>%
   #remove any cases that show up twice with multiple tests
   distinct(uid,campus,user_status)%>%
   group_by(campus,user_status) %>%
@@ -273,6 +273,7 @@ tecCampus1 <- routinetesting_w_week %>% left_join(individualdemographics) %>%
   #remove those not on UNH Durham, Manchester or Law
   filter(campus %in% c("UNH Manchester","UNH Durham","UNH LAW")) %>%
   #only include those conducted in the last two weeks
+  ## TO DO: I think we should show longer timeframe here
   filter(date > (Sys.Date()-14)) %>%
   filter(date <= Sys.Date()) %>%
   group_by(campus, date,result,week_no) %>%

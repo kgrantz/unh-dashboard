@@ -58,7 +58,7 @@ function(input, output) {
   output$state_case <- renderUI({box(
     state_curr_cases,
     width=4,
-    background=pick_color_threshold_numeric(random_numbers()[1], c(0, 5, 10, 100)),
+    background=pick_color_threshold_numeric(state_curr_cases, c(0, 100, 1200, 1800)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
   )})
   
@@ -74,7 +74,7 @@ function(input, output) {
   output$hospitalization <- renderUI({box(
     state_curr_hosp,
     width=4,
-    background=pick_color_threshold_numeric(random_numbers()[2], c(0, 5, 10, 100)),
+    background=pick_color_threshold_numeric(state_curr_hosp, c(0, 25, 50, 100)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
   )})
   
@@ -91,7 +91,11 @@ function(input, output) {
   output$current_restrictions <- renderUI({box(
     state_curr_cond,
     width=4,
-    background=ifelse(restriction()=="Open","green",ifelse(restriction() == "Limited","orange","red")),
+    background=ifelse(state_curr_cond=="None",
+                      "green",
+                      ifelse(state_curr_cond == "Open",
+                             "yellow",
+                             ifelse(state_curr_cond=="Limited Open", "orange", "red"))),
     href="https://www.covidguidance.nh.gov/"
   )})
   
@@ -171,17 +175,15 @@ function(input, output) {
   )})
   
   output$pct_isol_manch <- renderUI({box(
-    glue("{random_pct_isol()[2]}%"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_pct_isol()[2], c(0, 10, 50, 90))
+    background="white"
   )})
   
   output$pct_isol_concord <- renderUI({box(
-    glue("{random_pct_isol()[3]}%"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_pct_isol()[3], c(0, 10, 50, 90))
+    background="white"
   )})
   
   ## pct quar
@@ -197,31 +199,18 @@ function(input, output) {
   )})
   
   output$pct_quar_manch <- renderUI({box(
-    glue("{random_pct_quar()[2]}%"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_pct_quar()[2], c(0, 25, 50, 90))
+    background="white"
   )})
   
   output$pct_quar_concord <- renderUI({box(
-    glue("{random_pct_quar()[3]}%"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_pct_quar()[3], c(0, 25, 50, 90))
+    background="white"
   )})
   
   ## UNH Campus Situation -------------------------------------------------------
-  
-  # TO DO: replace this with function that builds epi curve for selected campus
-  # using input$campus
-  # Function should also take argument input$epi_curve_type to determine whether
-  # the epi curve bars are split by role (student/employee) or on/off campus
-  
-  
-  
-  #created a dummy data for campus tab in .csv. I am reading the file from my github repo. File is also at https://github.com/kgrantz/unh-dashboard/tree/master/fakedata.
-  campus_data<-read.csv(url("https://raw.githubusercontent.com/sowmyavs1992/data_science_1/master/dummy_data_campus_curve.csv"))
-  
   
   #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
   output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
@@ -280,46 +269,7 @@ function(input, output) {
   
   ## don't know what this number is to put in dummy data. TO DO: Find out what this number is
   n_test_no <- 1
-  
-  # output$n_isol_label <- renderUI({box(
-  #  strong("# active cases in isolation"),
-  # br(), 
-  #em("Total (symptomatic)"),
-  #width=4, 
-  #height=80)})
-  
-  #output$n_isol_value <- renderUI({box(
-  # h4(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")")),
-  #width=4, 
-  #height=60)})
-  
-  #output$n_quar_label <- renderUI({box(
-  # strong("# of Durham quarantined"), 
-  #br(), 
-  #em("Total"),
-  #width=4,
-  #height=80
-  #)})
-  
-  #output$n_quar_value <- renderUI({box(
-  # h4(n_quar_no()),
-  #width=4,
-  #height=60)})
-  
-  #output$n_test_label <- renderUI({box(
-  # strong("Days from test to isolation"), 
-  #em("7-day median"),
-  #width=4,
-  #height=80)})
-  
-  #output$n_test_value <- renderUI({box(
-  # h4(n_test_no),
-  #  width=4,
-  # height=60)})
-  
-  
-  #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
-  #other preferences
+
   output$n_isol_label <- renderUI({box(
     strong("# active cases in isolation"),
     br(), 
