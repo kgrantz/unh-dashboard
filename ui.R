@@ -195,13 +195,8 @@ dashboardPage(
                  plotOutput("testing_plot"), # TO DO: fix dimensions to server dimensions if needed
                  br(),
                  fluidRow(
-                   box(
-                     width=6,
-                     height=80,
-                     p("Median days from sample collection to test result day"),
-                     solidHeader=TRUE
-                   ),
-                   uiOutput("lab_unh_label"), # TO DO: these aren't displaying
+                   uiOutput("lab_delay_label"),
+                   uiOutput("lab_unh_label"), 
                    uiOutput("lab_quest_label"),
                    uiOutput("lab_cmd_label")
                  )

@@ -423,7 +423,7 @@ function(input, output) {
   
   output$testing_plot <- renderPlot({
     
-    date_limits <- c(min(tecCampusfinal$date)-6, max(tecCampusfinal$date)+6)
+    date_limits <- c(min(tecCampusfinal$date), max(tecCampusfinal$date))
     date_breaks = unique(tecCampusfinal$date)
     gtest <- ggplot() +
       geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity") +
@@ -434,37 +434,64 @@ function(input, output) {
       theme(axis.ticks.x=element_blank(),
             axis.text.x=element_text(angle=90),
             legend.position = "top")
+
+    glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
+      geom_text(aes(x=date, y=2, label=pct_pos_label)) +
+      geom_text(aes(x=date, y=3.5, label=n_pos)) +
+      geom_text(aes(x=date, y=5, label=n_tot)) +
+      scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
+      theme_minimal() +
+      theme(
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=11),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_blank()
+      )
     
-    #glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
-     # geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
-      #geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
-      #geom_text(aes(x=week_no, y=15, label=n_tot)) +
-      #scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
-      #theme_minimal() +
-      #theme(
-       # panel.grid.major = element_blank(), 
-        #panel.grid.minor = element_blank(),
-      #  panel.border = element_blank(),
-       # axis.line = element_blank(),
-      #  axis.text.x = element_blank(),
-       # axis.text.y = element_text(size=11),
-      #  axis.ticks = element_blank(),
-       # axis.title.x = element_blank(),
-      #  axis.title.y = element_blank(),
-       # plot.title = element_blank()
-      #)
+    # glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
+    #   geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
+    #   geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
+    #   geom_text(aes(x=week_no, y=15, label=n_tot)) +
+    #   scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
+    #   theme_minimal() +
+    #   theme(
+    #     panel.grid.major = element_blank(), 
+    #     panel.grid.minor = element_blank(),
+    #     panel.border = element_blank(),
+    #     axis.line = element_blank(),
+    #     axis.text.x = element_blank(),
+    #     axis.text.y = element_text(size=11),
+    #     axis.ticks = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.title.y = element_blank(),
+    #     plot.title = element_blank()
+    #   )
     
-    #glabel <- ggplot_gtable(ggplot_build(glabel))
+    glabel <- ggplot_gtable(ggplot_build(glabel))
     gtest <- ggplot_gtable(ggplot_build(gtest))
-    #gtest$widths <-glabel$widths 
+    gtest$widths <-glabel$widths 
     
-    grid.arrange(gtest)
+    grid.arrange(gtest, glabel)
     
   })
   
   
   ## Lab delay labels
- 
+  # TO DO: this is currently commented out since data is not yet available
+  
+  # output$lab_delay_label <- renderUI({box(
+  #   width=6,
+  #   height=80,
+  #   p("Median days from sample collection to test result day"),
+  #   solidHeader=TRUE
+  # )})
+  # 
   # output$lab_unh_label <- renderUI({box(
   #   h4(random_delays()[1]),
   #   em("UNH"),
@@ -480,15 +507,14 @@ function(input, output) {
   #   height=80,
   #   solidHeader = TRUE
   # )})
-  
-  # TO DO: this is currently commented out since data is not yet available
-  output$lab_cmd_label <- renderUI({box(
-    #h4(random_delays()[3]),
-    em("CMD"),
-    width=2, 
-    height=80,
-    solidHeader = TRUE
-  )})
+  # 
+  # output$lab_cmd_label <- renderUI({box(
+  #   h4(random_delays()[3]),
+  #   em("CMD"),
+  #   width=2, 
+  #   height=80,
+  #   solidHeader = TRUE
+  # )})
     
 })
 }
