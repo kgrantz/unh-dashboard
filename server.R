@@ -33,12 +33,12 @@ function(input, output) {
   # TO DO: replace this with function that builds epi curve for all data
   output$epi_curve_total <- renderPlot({
     p = ggplot(epi_curve_overall_week, aes(week_start_date, cases)) +
-      geom_bar(stat="identity") +
-      labs(x="Week",y="Cases", title='Total new cases diagnosed per week')+
-      theme(axis.title.x=element_blank(),
-            axis.text.x=element_text(angle=90),
-            axis.ticks.x=element_blank()) +
-      theme_bw()
+          geom_bar(stat="identity", fill="darkblue") +
+          labs(x="Week",y="Cases", title='Total new cases diagnosed per week') +
+          theme(axis.title.x=element_blank(),
+                axis.text.x=element_text(angle=90),
+                axis.ticks.x=element_blank()) +
+          theme_bw()
     p
   })
   
