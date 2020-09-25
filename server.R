@@ -14,18 +14,15 @@ function(input, output) {
   
   load(filename)
   
-  # TO DO: add in ability to scroll back on date
-  # possible_dates <- dir("data/")
-  # finds the maximum date to be "current_data"
-  # displays all possible dates in dropdown menu in sidebar, defaults to current_data
-  # if user selects some other date, load in Rdata from that directory
-  # otherwise read in data from "current_data" directory
+  # TO DO: in UI, restrict available date choices to those with data available
+  # OR: just roll back to the date with available data <= selected date; should add a label to sidebar saying 
+  # date of data is being used, since it might not match selection
   
   #Sys.sleep(2)
   #waiter_hide()
   
   ## Home page -----------------------------------------------------------------
-  # output$date_updated <- renderText({glue("Last updated: ", "{Sys.Date()}")}) # TO DO: update this with data load
+  output$date_updated <- renderText({glue("Last updated: ", "{updated.date}")}) # TO DO: update this with data load
   
   ## EPI CURVE ---------
   data_random <- reactive({ 

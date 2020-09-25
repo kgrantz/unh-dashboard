@@ -349,6 +349,14 @@ pct_pos <- tecCampusfinal %>%
             pct_pos = n_pos/ ifelse((n_pos + n_neg)==0,1,(n_pos+n_neg)),
             pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
 
+pct_pos_daily <- tecCampusfinal %>%
+  group_by(date, campus) %>%
+  summarise(n_pos = sum(tests[which(result=="Positive")]),
+            n_neg = sum(tests[which(result=="Negative")]),
+            n_tot = sum(tests),
+            n_not_subm = round(n_tot*0.1),
+            pct_pos = n_pos/ ifelse((n_pos + n_neg)==0,1,(n_pos+n_neg)),
+            pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
 
 ### Testing delays ------------------------------- 
 # we can't really do this yet
@@ -379,6 +387,7 @@ save(file=filename,
               "threshdf",
               "dormdf",
               "tecCampusfinal",
-              "pct_pos"
+              "pct_pos",
+              "pct_pos_daily"
               ))
 

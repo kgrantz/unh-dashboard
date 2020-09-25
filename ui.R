@@ -16,7 +16,7 @@ dashboardPage(
       id="tabs",
       dateInput("InputDate",
       ##for now we are keeping the value fixed on Sep
-                "Dashboard updated on:",value=Sys.Date(), min="2020-09-23", max=Sys.Date()),
+                "Display Data From:",value=Sys.Date(), min="2020-09-23", max=Sys.Date()),
       menuItem("Dashboard", 
                tabName = "dashboard", 
                icon = icon("dashboard")),
@@ -26,8 +26,10 @@ dashboardPage(
       conditionalPanel(
         'input.tabs == "campus"',
         menuItemOutput("campus_dropdown")
-      )
-      
+      ),
+      br(),
+      br(),
+      textOutput("date_updated")
     ) # END sidebarMenu
   ), # END sidebar
   
