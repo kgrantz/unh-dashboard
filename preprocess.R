@@ -97,10 +97,83 @@ state_curr_cond <- "Widespread"
 # case rate per 1000
 # number active cases currently? should be n_isol if they're actually isolating everbody
 
+# Cases testing positive in the last 10 days
+cases10 <- routinetesting %>% 
+  filter(result=="Positive") %>%
+  left_join(individualdemographics) %>%
+  #change the date
+  mutate(date=ifelse(is.na(collectdate),
+                     as.character(resultsdate),
+                     as.character(collectdate))) %>%
+  mutate(date=as.Date(date)) %>%
+  #only include those conducted in the last two weeks
+  filter(date > (Sys.Date()-10)) %>%
+  filter(date <= Sys.Date())
+
+# # Currently quarantined
+# quarantined <- isolationquarantine %>% 
+#   #limit to those which have an entry date before
+#   filter(quar_entrydate<=Sys.Date()) %>%
+#   #limit to those who have an exit day after
+#   filter(quar_exitdate>Sys.Date()) %>%
+#   distinct(uid)
+
+# those who are quarantined at the moment
+quardf <- isolationquarantine %>% 
+  #limit to those which have an entry date 
+  filter(quar_entrydate<=Sys.Date()) %>%
+  #limit to those who have an exit day after today or none listed
+  filter(quar_exitdate>Sys.Date() |is.na(quar_exitdate)) %>%
+  distinct(uid) %>%
+  left_join(individualdemographics) %>%
+  group_by(campus) %>%
+  summarize(quarantined=n())
+
+
+# those who are isolated at the moment
+isodf <- isolationquarantine %>% 
+  #limit to those which have an entry date 
+  filter(iso_entrydate<=Sys.Date()) %>%
+  #limit to those who have an exit day after or none listed
+  filter(iso_exitdate>Sys.Date()|is.na(iso_exitdate>Sys.Date())) %>%
+  distinct(uid) %>%
+  left_join(individualdemographics) %>%
+  group_by(campus) %>%
+  summarize(isolated=n())
+
+
+# number of people who are being tested (should this be our denominator???)
+census <- distinct(individualdemographics,uid,campus,user_status) %>%
+  group_by(campus) %>%
+  summarize(pop=n()) 
+
+
+#final table for threshold dataframe
+threshdf <- cases10 %>%
+  #remove any cases that show up twice with multiple tests
+  distinct(uid,campus)%>%
+  group_by(campus) %>%
+  summarize(cases=n()) %>%
+  #include the zeroes
+  full_join(census) %>%
+  filter(campus %in% c("UNH Durham","UNH LAW",
+                       "UNH Manchester"))%>%
+  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
+  #calculate rate per 1000
+  mutate(rate=cases/pop*1000)%>%
+  #add the number of people quarantined/ isolated
+  left_join(quardf) %>%
+  mutate(quarantined=ifelse(is.na(quarantined),
+                            0,quarantined)) %>%
+  left_join(isodf) %>%
+  mutate(isolated=ifelse(is.na(isolated),
+                         0,isolated)) %>%
+  select(-pop)
+
 
 ### Sanity checks  ------------------------------- 
 ### All to add more
-if(n_isol_sym>n_isol){stop("this is wrong")}
+# if(n_isol_sym>n_isol){stop("this is wrong")}
 
 
 
@@ -184,133 +257,46 @@ routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("
 ### Campus specific numbers: included in thresholds data  ------------------------------- 
 ### included in thresholds data
 
-### Dorm-specific campus table  ------------------------------- 
-### FORREST
-# data frame with cumulative counts
-#   column campus
-#   column dorms (with off campus) -- intersection of (off_campus, campus)
-#   column incident cases (new positive tests) in last 10 days
-#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 days) 
-#   # quarantined
-#   % all beds occupied
-# TO DO: decide if this is best "% positive" metric or want something different
+    ### Dorm-specific campus table  ------------------------------- 
+    ### FORREST
+    # data frame with cumulative counts
+    #   column campus
+    #   column dorms (with off campus) -- intersection of (off_campus, campus)
+    #   column incident cases (new positive tests) in last 10 days
+    #   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 days) 
+    #   # quarantined
+    #   % all beds occupied
+    # TO DO: decide if this is best "% positive" metric or want something different
+    
+    
 
-
-### Student/faculty-specific campus table  ------------------------------- 
-### FORREST
-# data frame with cumulative counts
-#   column campus
-#   column user_status
-#   column incident cases (new positive tests) in last 10 days
-#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 weeks) 
-#   # quarantined
-#   % all beds occupied
-# TO DO: decide if this is best "% positive" metric or want something different
-
-# Cases testing positive in the last 10 days
-cases10 <- routinetesting %>% 
-  filter(result=="Positive") %>%
-  left_join(individualdemographics) %>%
-  #change the date
-  mutate(date=ifelse(is.na(collectdate),
-                            as.character(resultsdate),
-                            as.character(collectdate))) %>%
-  mutate(date=as.Date(date)) %>%
-  #only include those conducted in the last two weeks
-  filter(date > (Sys.Date()-10)) %>%
-  filter(date <= Sys.Date())
-
-# Currently quarantined
-quarantined <- isolationquarantine %>% 
-  #limit to those which have an entry date before
-  filter(quar_entrydate<=Sys.Date()) %>%
-  #limit to those who have an exit day after
-  filter(quar_exitdate>Sys.Date()) %>%
-  distinct(uid)
-
-# number of people who are being tested (should this be our denominator???)
-censussf <- distinct(individualdemographics,uid,campus,user_status) %>%
-  group_by(campus,user_status) %>%
-  summarize(pop=n()) 
-
-# number of those quarantined by each campus / user status
-quarsf <- quarantined %>% left_join(individualdemographics) %>%
-  group_by(campus,user_status) %>%
-  summarize(quarantined=n())
-
-# final table for student faculty
-studentfaculty <- cases10 %>%
-  #remove any cases that show up twice with multiple tests
-  distinct(uid,campus,user_status)%>%
-  group_by(campus,user_status) %>%
-  summarize(cases=n()) %>%
-  #include the zeroes
-  full_join(censussf) %>%
-  filter(campus %in% c("UNH Durham","UNH LAW",
-                       "UNH Manchester"
-  ))%>%
-  filter(!is.na(user_status))%>%
-  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
-  #calculate rate per 1000
-  mutate(rate=cases/pop*1000)%>%
-  #add the number of people quarantined
-  left_join(quarsf) %>%
-  mutate(quarantined=ifelse(is.na(quarantined),
-                            0,quarantined)) 
-
- # those who are quarantined at the moment
-    quardf <- isolationquarantine %>% 
-      #limit to those which have an entry date 
+    # Currently quarantined from dorms
+    quardorm <- isolationquarantine %>% 
+      #limit to those which have an entry date before
       filter(quar_entrydate<=Sys.Date()) %>%
-      #limit to those who have an exit day after today or none listed
-      filter(quar_exitdate>Sys.Date() |is.na(quar_exitdate)) %>%
-      distinct(uid) %>%
-      left_join(individualdemographics) %>%
-      group_by(campus) %>%
+      #limit to those who have an exit day after
+      filter(quar_exitdate>Sys.Date()) %>%
+      distinct(uid)%>%
+      left_join(individualdemographics)%>%
+      group_by(dorm)%>%
       summarize(quarantined=n())
-
-
-    # those who are isolated at the moment
-    isodf <- isolationquarantine %>% 
-      #limit to those which have an entry date 
-      filter(iso_entrydate<=Sys.Date()) %>%
-      #limit to those who have an exit day after or none listed
-      filter(iso_exitdate>Sys.Date()|is.na(iso_exitdate>Sys.Date())) %>%
-      distinct(uid) %>%
-      left_join(individualdemographics) %>%
-      group_by(campus) %>%
-      summarize(isolated=n())
-
-
+    
     # number of people who are being tested (should this be our denominator???)
-    census <- distinct(individualdemographics,uid,campus,user_status) %>%
-      group_by(campus) %>%
+    censusdorm <- distinct(individualdemographics,uid,dorm) %>%
+      group_by(dorm) %>%
       summarize(pop=n()) 
-
-
-#final table for threshold dataframe
-threshdf <- cases10 %>%
-  #remove any cases that show up twice with multiple tests
-  distinct(uid,campus)%>%
-  group_by(campus) %>%
-  summarize(cases=n()) %>%
-  #include the zeroes
-  full_join(census) %>%
-  filter(campus %in% c("UNH Durham","UNH LAW",
-                       "UNH Manchester"
-  ))%>%
-  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
-  #calculate rate per 1000
-  mutate(rate=cases/pop*1000)%>%
-  #add the number of people quarantined/ isolated
-  left_join(quardf) %>%
-  mutate(quarantined=ifelse(is.na(quarantined),
-                            0,quarantined)) %>%
-  left_join(isodf) %>%
-  mutate(isolated=ifelse(is.na(isolated),
-                         0,isolated)) %>%
-  select(-pop)
-
+    
+    #dorm table
+    dormdf <- cases10 %>% group_by(dorm) %>%
+      summarize(cases=n()) %>%
+      full_join(censusdorm) %>%
+      filter(!is.na(dorm)) %>%
+      mutate(cases=ifelse(is.na(cases),0,cases))%>%
+      mutate(rate=cases/pop*1000) %>%
+      arrange(-rate) %>%
+      left_join(quardorm) %>%
+      mutate(quarantined=ifelse(is.na(quarantined),0,quarantined))
+        
 
 
 ### Testing epi curve ------------------------------- 
@@ -346,7 +332,6 @@ tecCampusfinal <- tecCampus1 %>%
   mutate(tests=ifelse(is.na(tests),0,tests))
 
 ### Testing table ------------------------------- 
-### FORREST
 # data frame -- WEEK LEVEL for table
 # summarize the daily table by week to produce columns:
 # campus
@@ -355,8 +340,8 @@ tecCampusfinal <- tecCampus1 %>%
 # n_not_submitted = (all tests that should have been collected - all tests that were collected) 
 # % positive tests = # all positive tests / (# all positive tests + # all negative tests)
 # to figure out what they're doing about pooled samples - does the updated result of a pooled sample go in as a new row (so rows are tests) or are rows just samples
-pct_pos <- tecCampusfinal %>% 
-  group_by(week_no, campus) %>% 
+pct_pos <- tecCampusfinal %>%
+  group_by(week_no, campus) %>%
   summarise(n_pos = sum(tests[which(result=="Positive")]),
             n_neg = sum(tests[which(result=="Negative")]),
             n_tot = sum(tests),
@@ -391,7 +376,9 @@ save(file=filename,
               "state_curr_hosp",
               "state_curr_cond",
               "routinetesting_demograph_epi_curve",
-              "studentfaculty",
+              "threshdf",
+              "dormdf",
               "tecCampusfinal",
-              "pct_pos"))
+              "pct_pos"
+              ))
 
