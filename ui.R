@@ -170,15 +170,19 @@ dashboardPage(
                ), # end fluidRow
                
                
-               # Dorm table 
-               fluidRow(
-                 div(style = "font-size: 12px;", ##reducing font size.
-                     fluidRow(
-                       dataTableOutput("mytable"),
-                       width=NULL,
-                       height=70)
-                 )
-               ) # end fluidRow
+               # Dorm table
+               # now conditional to only display if campus = Durham
+               conditionalPanel(
+                 'input.Campus == "UNH Durham"',
+                 fluidRow(
+                   div(style = "font-size: 12px;", ##reducing font size.
+                       fluidRow(
+                         dataTableOutput("mytable"),
+                         width=NULL,
+                         height=70)
+                   )
+                 ) # end fluidRow
+               ) # end conditional panel
                
         ),# END lefthand column
         
