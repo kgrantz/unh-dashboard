@@ -78,9 +78,10 @@ epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
 ### Kyra
 state_curr_cases <- 266 
 state_curr_hosp <- 17
-state_curr_cond <- "Widespread"
-# should be either "Open", for no restrictions
-#                  "Widespread", for many restrictions but not shut-down
+state_curr_cond <- "Limited Open"
+# should be either "None", for no restrictions
+#                  "Open", for restrictions on mass gatherings, otherwise open
+#                  "Limited Open", for many restrictions but not shut-down
 #                  "Limited", for stay-at-home order
 # TO DO: these are poorly defined categories, should come up with something more precise
 # TO DO: figure out if we can api into DHHS data somehow? otherwise write this as an `opt` statement in wrapper script
