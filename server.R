@@ -64,7 +64,7 @@ function(input, output) {
   
   #Hospitalization
   output$hospitalization_label <- renderUI({box(
-    strong("Statewide Currently"),
+    strong("Statewide"),
     strong("Hospitalized"),
     width=4,
     height=40,
@@ -326,35 +326,38 @@ function(input, output) {
   #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
   #other preferences
   output$n_isol_label <- renderUI({box(
-    strong("# active cases in isolation"),
-    br(), 
-    em("Total  (symptomatic)"),
-    br(),
-    h4(strong(glue("{n_isol}", "  (", "{n_isol_sym}", ")"))),
-    width=4, 
-    height=80,
-    solidHeader = TRUE)})
-  
-  output$n_quar <- renderUI({box(
-    strong(paste0("# of ",campus_opt()," quarantined")), 
+    strong("# individuals in isolation"),
     br(), 
     em("Total"),
     br(),
-    h4(strong(n_quar_no)),
-    width=4,
+    #em("Total  (symptomatic)"),
+    #br(),
+    h4(strong(threshdf$isolated[threshdf$campus == campus_opt()])),
+    width=5, 
+    height=80,
+    solidHeader = TRUE)})
+  # TO DO: commented out symptomatic because we don't have that data yet
+  
+  output$n_quar <- renderUI({box(
+    strong(paste0("# individuals in quarantine")), 
+    br(), 
+    em("Total"),
+    br(),
+    h4(strong(threshdf$quarantined[threshdf$campus == campus_opt()])),
+    width=6,
     height=80,
     solidHeader = TRUE)})
   
   output$n_test <- renderUI({box(
-    strong("Days from test to isolation"), 
-    br(), 
-    em("7-day median"),
-    br(),
-    h4(strong(n_test_no)),
-    width=4,
+    # strong("Days from test to isolation"), 
+    # br(), 
+    # em("7-day median"),
+    # br(),
+    # h4(strong(n_test_no)),
+    width=1,
     height=80,
     solidHeader = TRUE)})
-  
+    # TO DO: commented out because we do not have this data yet; change widths if we begin to include this again
   
   
   # TO DO: create function to process this data from whatever final format lab data takes
