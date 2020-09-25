@@ -6,8 +6,11 @@ function(input, output) {
   library(htmltools)
   library(gridExtra)
   
+  observeEvent(input$InputDate,{ 
+
+  filter_date=as.character(input$InputDate)
   
-  filename <- paste0("data/",Sys.Date(),"/processed_data.Rdata")
+  filename <- paste0("data/",filter_date,"/processed_data.Rdata")
   
   load(filename)
   
@@ -32,7 +35,7 @@ function(input, output) {
   
   # TO DO: replace this with function that builds epi curve for all data
   output$epi_curve_total <- renderPlot({
-    p = ggplot(epi_curve_overall_week, aes(week_no, cases)) +
+    p = ggplot(epi_curve_overall_week, aes(week_start_date, cases)) +
       geom_bar(stat="identity") +
       labs(x="Week",y="Cases", title='Total new cases diagnosed per week')+
       theme(axis.title.x=element_blank(),
@@ -109,26 +112,26 @@ function(input, output) {
   })
   
   output$active_cases_durham <- renderUI({box(
-    random_active_cases()[1],
+    threshdf[1,2],
     width=3, 
     height=80,
-    background=pick_color_threshold_numeric(random_active_cases()[1], c(0, 10, 50, 200)),
+    background=pick_color_threshold_numeric(threshdf[1,2], c(-1, 10, 50, 200)),
     solidHeader = TRUE
   )})
   
   output$active_cases_manch <- renderUI({box(
-    random_active_cases()[2],
+    threshdf[2,2],
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_active_cases()[2], c(0, 10, 50, 200)),
+    background=pick_color_threshold_numeric(threshdf[2,2], c(-1, 10, 50, 200)),
     solidHeader=TRUE
   )})
   
   output$active_cases_concord <- renderUI({box(
-    random_active_cases()[3],
+    threshdf[3,2],
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_active_cases()[3], c(0, 10, 50, 200)),
+    background=pick_color_threshold_numeric(threshdf[3,2], c(-1, 10, 50, 200)),
     solidHeader=TRUE
   )})
   
@@ -138,26 +141,26 @@ function(input, output) {
   })
   
   output$case_rates_durham <- renderUI({box(
-    glue("{random_case_rates()[1]} per 1000"),
+    glue("{round(threshdf[1,3],2)} per 1000"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_case_rates()[1], c(0, 5, 100, 200)),
+    background=pick_color_threshold_numeric(threshdf[1,3], c(-1, 5, 100, 200)),
     solidHeader=TRUE
   )})
   
   output$case_rates_manch <- renderUI({box(
-    glue("{random_case_rates()[2]} per 1000"),
+    glue("{threshdf[2,3]} per 1000"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_case_rates()[2], c(0, 5, 100, 200)),
+    background=pick_color_threshold_numeric(threshdf[2,3], c(-1, 5, 100, 200)),
     solidHeader=TRUE
   )})
   
   output$case_rates_concord <- renderUI({box(
-    glue("{random_case_rates()[3]} per 1000"),
+    glue("{threshdf[3,3]} per 1000"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_case_rates()[3], c(0, 5, 100, 200)),
+    background=pick_color_threshold_numeric(threshdf[3,3], c(-1, 5, 100, 200)),
     solidHeader=TRUE
   )})
   
@@ -167,23 +170,25 @@ function(input, output) {
   })
   
   output$pct_isol_durham <- renderUI({box(
-    glue("{random_pct_isol()[1]}%"),
+    glue("{threshdf[1,4]}"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_pct_isol()[1], c(0, 10, 50, 90)),
+    background=pick_color_threshold_numeric(threshdf[1,4], c(-1, 10, 50, 90)),
     solidHeader=TRUE
   )})
   
   output$pct_isol_manch <- renderUI({box(
+    glue("{threshdf[2,4]}"),
     width=3,
     height=80,
-    background="white"
+    background=pick_color_threshold_numeric(threshdf[2,4], c(-1, 10, 50, 90))
   )})
   
   output$pct_isol_concord <- renderUI({box(
+    glue("{threshdf[3,4]}"),
     width=3,
     height=80,
-    background="white"
+    background=pick_color_threshold_numeric(threshdf[3,4], c(-1, 10, 50, 90))
   )})
   
   ## pct quar
@@ -192,25 +197,39 @@ function(input, output) {
   })
   
   output$pct_quar_durham <- renderUI({box(
-    glue("{random_pct_quar()[1]}%"),
+    glue("{threshdf[1,5]}"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(random_pct_quar()[1], c(0, 25, 50, 90))
+    background=pick_color_threshold_numeric(threshdf[1,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_manch <- renderUI({box(
+    glue("{threshdf[2,5]}"),
     width=3,
     height=80,
-    background="white"
+    background=pick_color_threshold_numeric(threshdf[2,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_concord <- renderUI({box(
+    glue("{threshdf[3,5]}"),
     width=3,
     height=80,
-    background="white"
+    background=pick_color_threshold_numeric(threshdf[3,5], c(-1, 25, 50, 90))
   )})
   
   ## UNH Campus Situation -------------------------------------------------------
+  
+  # TO DO: replace this with function that builds epi curve for selected campus
+  # using input$campus
+  # Function should also take argument input$epi_curve_type to determine whether
+  # the epi curve bars are split by role (student/employee) or on/off campus
+  
+  
+  
+  #created a dummy data for campus tab in .csv. I am reading the file from my github repo. File is also at https://github.com/kgrantz/unh-dashboard/tree/master/fakedata.
+  
+  #campus_data<-read.csv(url("https://raw.githubusercontent.com/sowmyavs1992/data_science_1/master/dummy_data_campus_curve.csv"))
+  
   
   #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
   output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
@@ -230,7 +249,7 @@ function(input, output) {
   #plot for On/Off Campus split
   output$location_plot <- renderPlot({
     
-    ggplot(subset(campus_data, college==campus_opt() & id=="campus" ), aes(week_no, cases,fill=level)) +
+    ggplot(subset(routinetesting_campus_location, campus==campus_opt()), aes(week_start_date, cases,fill=level)) +
       geom_bar(stat="identity") +
       labs(x="Week",y="Cases", title='Total new cases diagnosed per week on/off campus')+
       scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
@@ -245,7 +264,7 @@ function(input, output) {
   #plot for student/faculty split
   output$personnel_plot <- renderPlot({
     
-    ggplot(subset(campus_data, college==campus_opt() & id=="person"), aes(week_no, cases,fill=level)) +
+    ggplot(subset(routinetesting_campus_personnel, campus==campus_opt()), aes(week_start_date, cases,fill=level)) +
       geom_bar(stat="identity") +
       labs(x="Week",y="Cases", title='Total new cases diagnosed per week among students and faculty')+
       scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
@@ -259,23 +278,62 @@ function(input, output) {
   
   # TO DO: make sure calculation of number isolated matches final data format
   # TO DO -- CHANGE THIS TO DIFFERENT OBJECT to pull isolation numbers
-  n_isol <- reactive({sum(subset(campus_data,college==campus_opt()) $isolation)})
+  n_isol <- 0
   
   # TO DO: make sure calculation of number isolated + symptomatic matches final data format
-  n_isol_sym <- reactive({sum(subset(campus_data,college==campus_opt()) $symptomatic)})
+  n_isol_sym <- 0
   
   # TO DO: make sure calculation of number isolated + symptomatic matches final data format
-  n_quar_no <-  reactive({sum(subset(campus_data,college==campus_opt()) $quarantine)})
+  n_quar_no <-  0
   
   ## don't know what this number is to put in dummy data. TO DO: Find out what this number is
-  n_test_no <- 1
-
+  n_test_no <- 0
+  
+  # output$n_isol_label <- renderUI({box(
+  #  strong("# active cases in isolation"),
+  # br(), 
+  #em("Total (symptomatic)"),
+  #width=4, 
+  #height=80)})
+  
+  #output$n_isol_value <- renderUI({box(
+  # h4(glue("{n_isol}", "  (", "{n_isol_sym}", ")")),
+  #width=4, 
+  #height=60)})
+  
+  #output$n_quar_label <- renderUI({box(
+  # strong("# of Durham quarantined"), 
+  #br(), 
+  #em("Total"),
+  #width=4,
+  #height=80
+  #)})
+  
+  #output$n_quar_value <- renderUI({box(
+  # h4(n_quar_no,
+  #width=4,
+  #height=60)})
+  
+  #output$n_test_label <- renderUI({box(
+  # strong("Days from test to isolation"), 
+  #em("7-day median"),
+  #width=4,
+  #height=80)})
+  
+  #output$n_test_value <- renderUI({box(
+  # h4(n_test_no),
+  #  width=4,
+  # height=60)})
+  
+  
+  #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
+  #other preferences
   output$n_isol_label <- renderUI({box(
     strong("# active cases in isolation"),
     br(), 
     em("Total  (symptomatic)"),
     br(),
-    h4(strong(glue("{n_isol()}", "  (", "{n_isol_sym()}", ")"))),
+    h4(strong(glue("{n_isol}", "  (", "{n_isol_sym}", ")"))),
     width=4, 
     height=80,
     solidHeader = TRUE)})
@@ -285,7 +343,7 @@ function(input, output) {
     br(), 
     em("Total"),
     br(),
-    h4(strong(n_quar_no())),
+    h4(strong(n_quar_no)),
     width=4,
     height=80,
     solidHeader = TRUE)})
@@ -306,9 +364,9 @@ function(input, output) {
   # will depend on campus_opt()
   # (from Kyra) I'm not sure this needs to be datatable vs static form like kableExtra? formatting still needs work
   Dorm <- c("Dorm A","Dorm B","Off-campus")
-  Positive_tests <- c(2,3,1)
-  perc_positive <- c(0.02,0.07,0.01)
-  n_quart <- c(31,45,14)
+  Positive_tests <- c(0,0,0)
+  perc_positive <- c(0,0,0)
+  n_quart <- c(0,0,0)
   
   Dorm_tab <- cbind(Dorm,Positive_tests,perc_positive,n_quart)
   
@@ -366,30 +424,30 @@ function(input, output) {
             axis.text.x=element_text(angle=90),
             legend.position = "top")
     
-    glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
-      geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
-      geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
-      geom_text(aes(x=week_no, y=15, label=n_tot)) +
-      scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
-      theme_minimal() +
-      theme(
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        axis.line = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size=11),
-        axis.ticks = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_blank()
-      )
+    #glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
+     # geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
+      #geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
+      #geom_text(aes(x=week_no, y=15, label=n_tot)) +
+      #scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
+      #theme_minimal() +
+      #theme(
+       # panel.grid.major = element_blank(), 
+        #panel.grid.minor = element_blank(),
+      #  panel.border = element_blank(),
+       # axis.line = element_blank(),
+      #  axis.text.x = element_blank(),
+       # axis.text.y = element_text(size=11),
+      #  axis.ticks = element_blank(),
+       # axis.title.x = element_blank(),
+      #  axis.title.y = element_blank(),
+       # plot.title = element_blank()
+      #)
     
-    glabel <- ggplot_gtable(ggplot_build(glabel))
+    #glabel <- ggplot_gtable(ggplot_build(glabel))
     gtest <- ggplot_gtable(ggplot_build(gtest))
-    gtest$widths <-glabel$widths 
+    #gtest$widths <-glabel$widths 
     
-    grid.arrange(gtest, glabel, heights=c(7, 3))
+    grid.arrange(gtest)
     
   })
   
@@ -422,8 +480,7 @@ function(input, output) {
     height=80,
     solidHeader = TRUE
   )})
-  
-  
+    
+})
 }
-
 #)
