@@ -339,7 +339,7 @@ function(input, output) {
     solidHeader = TRUE)})
   
   output$n_quar <- renderUI({box(
-    strong("# of Durham quarantined"), 
+    strong(paste0("# of ",campus_opt()," quarantined")), 
     br(), 
     em("Total"),
     br(),
