@@ -282,12 +282,13 @@ routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("
       summarize(quarantined=n())
     
     # number of people who are being tested (should this be our denominator???)
-    censusdorm <- distinct(individualdemographics,uid,dorm) %>%
-      group_by(dorm) %>%
-      summarize(pop=n()) 
+    censusdorm <- distinct(individualdemographics,uid,dorm,campus) %>%
+      group_by(dorm,campus) %>%
+      summarize(pop=n())
     
-    #dorm table
-    dormdf <- cases10 %>% group_by(dorm) %>%
+    # dorm table
+    # TO DO: add row with "Off campus: Students" and "Off campus: Faculty/Staff/Emp"
+    dormdf <- cases10 %>% group_by(campus, dorm) %>%
       summarize(cases=n()) %>%
       full_join(censusdorm) %>%
       filter(!is.na(dorm)) %>%

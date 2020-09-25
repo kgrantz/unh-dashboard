@@ -360,15 +360,28 @@ function(input, output) {
     # TO DO: commented out because we do not have this data yet; change widths if we begin to include this again
   
   
-  # TO DO: create function to process this data from whatever final format lab data takes
-  # will depend on campus_opt()
-  # (from Kyra) I'm not sure this needs to be datatable vs static form like kableExtra? formatting still needs work
-  Dorm <- c("Dorm A","Dorm B","Off-campus")
-  Positive_tests <- c(0,0,0)
-  perc_positive <- c(0,0,0)
-  n_quart <- c(0,0,0)
+  # dorm table - only needed for UNH Durham currently
+  # TO DO: figure out why subseting with campus_opt() did not work
+  Dorm_tab <- subset(dormdf,campus=="UNH Durham")
   
-  Dorm_tab <- cbind(Dorm,Positive_tests,perc_positive,n_quart)
+  if(nrow(Dorm_tab)<1){
+    # dummy data for when there are no dorms available
+    # not actually shown currently, but to make sure nothing funky happens
+    dorm <- campus_opt
+    cases <- threshdf$cases[threshdf$campus==campus_opt()]
+    rate <- threshdf$rate[threshdf$campus==campus_opt()]
+    quarantined <- threshdf$quarantined[threshdf$campus==campus_opt()]
+    
+    Dorm_tab <- cbind(dorm,cases,rate,quarantined)
+  }else{
+    Dorm_tab <- Dorm_tab %>%
+                ungroup() %>%
+                select(dorm, cases, rate, quarantined) %>%
+                mutate(rate = round(rate, 2)) %>%
+                arrange(desc(cases))
+    
+    Dorm_tab <- as.matrix(Dorm_tab)
+  }
   
   #table out to UI
   dorm_table = htmltools::withTags(table(
@@ -377,19 +390,18 @@ function(input, output) {
     thead(
       tr(
         th(rowspan = 2, "Dorm"),
-        th(colspan = 1, "Positive tests"),
-        th(colspan = 1, "% Positivity"),
+        th(colspan = 1, "Active Cases"),
+        th(colspan = 1, "Active Cases"),
         th(colspan = 1, "# Quarantined")
       ),
       tr(
-        th("(14-day total)"),
-        th("(14-day average)"),
-        th("(% of all beds)")
+        th("(10-day total)"),
+        th("per 1000 population"),
+        th("from dorm")
       )
       
     )
   ))
-  
   
   output$mytable = renderDataTable({
     DT::datatable(
@@ -413,7 +425,6 @@ function(input, output) {
     
     date_limits <- c(min(tecCampusfinal$date)-6, max(tecCampusfinal$date)+6)
     date_breaks = unique(tecCampusfinal$date)
-    
     gtest <- ggplot() +
       geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity") +
       scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
@@ -453,10 +464,7 @@ function(input, output) {
   
   
   ## Lab delay labels
-  random_delays <- reactive({
-    ceiling(runif(3, min=0, max=14))
-  })
-  
+ 
   # output$lab_unh_label <- renderUI({box(
   #   h4(random_delays()[1]),
   #   em("UNH"),
@@ -473,8 +481,9 @@ function(input, output) {
   #   solidHeader = TRUE
   # )})
   
+  # TO DO: this is currently commented out since data is not yet available
   output$lab_cmd_label <- renderUI({box(
-    h4(random_delays()[3]),
+    #h4(random_delays()[3]),
     em("CMD"),
     width=2, 
     height=80,
