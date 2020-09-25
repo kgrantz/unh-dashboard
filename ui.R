@@ -14,6 +14,9 @@ dashboardPage(
     width=240,
     sidebarMenu(
       id="tabs",
+      dateInput("InputDate",
+      ##for now we are keeping the value fixed on Sep
+                "Dashboard updated on:",value=Sys.Date(), min="2020-09-23", max=Sys.Date()),
       menuItem("Dashboard", 
                tabName = "dashboard", 
                icon = icon("dashboard")),
