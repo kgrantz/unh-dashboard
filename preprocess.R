@@ -258,7 +258,34 @@ studentfaculty <- cases10 %>%
   mutate(quarantined=ifelse(is.na(quarantined),
                             0,quarantined)) 
 
+ # those who are quarantined at the moment
+    quardf <- isolationquarantine %>% 
+      #limit to those which have an entry date 
+      filter(quar_entrydate<=Sys.Date()) %>%
+      #limit to those who have an exit day after today or none listed
+      filter(quar_exitdate>Sys.Date() |is.na(quar_exitdate)) %>%
+      distinct(uid) %>%
+      left_join(individualdemographics) %>%
+      group_by(campus) %>%
+      summarize(quarantined=n())
 
+
+    # those who are isolated at the moment
+    isodf <- isolationquarantine %>% 
+      #limit to those which have an entry date 
+      filter(iso_entrydate<=Sys.Date()) %>%
+      #limit to those who have an exit day after or none listed
+      filter(iso_exitdate>Sys.Date()|is.na(iso_exitdate>Sys.Date())) %>%
+      distinct(uid) %>%
+      left_join(individualdemographics) %>%
+      group_by(campus) %>%
+      summarize(isolated=n())
+
+
+    # number of people who are being tested (should this be our denominator???)
+    census <- distinct(individualdemographics,uid,campus,user_status) %>%
+      group_by(campus) %>%
+      summarize(pop=n()) 
 
 
 #final table for threshold dataframe
