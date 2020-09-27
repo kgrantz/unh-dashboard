@@ -78,7 +78,10 @@ dashboardPage(
                      uiOutput("state_case"),
                      uiOutput("hospitalization"),
                      uiOutput("current_restrictions")
-                   )#end fluid row
+                   ),#end fluid row
+                   fluidRow(
+                     textOutput("state_date_updated")
+                   )
                  )#end box
                )#end fluid row
         ),#end Column 1
@@ -112,13 +115,17 @@ dashboardPage(
                   uiOutput("case_rates_concord")
                 ),
                 fluidRow(
-                  box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  # TO DO: change to % isolation beds when that data is available
+                  # box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("# in Isolation",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("pct_isol_durham"),
                   uiOutput("pct_isol_manch"),
                   uiOutput("pct_isol_concord")
                 ),
                 fluidRow(
-                  box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  # TO DO: change to % quarantine beds when that data is available
+                  # box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("# in Quarantine", width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("pct_quar_durham"),
                   uiOutput("pct_quar_manch"),
                   uiOutput("pct_quar_concord")

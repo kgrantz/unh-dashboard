@@ -22,7 +22,7 @@ function(input, output) {
   #waiter_hide()
   
   ## Home page -----------------------------------------------------------------
-  output$date_updated <- renderText({glue("Last updated: ", "{updated.date}")}) # TO DO: update this with data load
+  output$date_updated <- renderText({glue("Last updated: ", "{updated.date}")})
   
   ## EPI CURVE ---------
   data_random <- reactive({ 
@@ -30,7 +30,6 @@ function(input, output) {
     
   })
   
-  # TO DO: replace this with function that builds epi curve for all data
   output$epi_curve_total <- renderPlot({
     p = ggplot(epi_curve_overall_week, aes(week_start_date, cases)) +
           geom_bar(stat="identity", fill="darkblue") +
@@ -99,7 +98,7 @@ function(input, output) {
     href="https://www.covidguidance.nh.gov/"
   )})
   
-  # TO DO: add in small text date at which statewide conditions were updated
+  output$state_date_updated <- renderText({glue("State conditions last updated: ", "{state.updated.date}")})
   
   ## CAMPUS SITUATION ---------
   
@@ -216,18 +215,6 @@ function(input, output) {
   
   ## UNH Campus Situation -------------------------------------------------------
   
-  # TO DO: replace this with function that builds epi curve for selected campus
-  # using input$campus
-  # Function should also take argument input$epi_curve_type to determine whether
-  # the epi curve bars are split by role (student/employee) or on/off campus
-  
-  
-  
-  #created a dummy data for campus tab in .csv. I am reading the file from my github repo. File is also at https://github.com/kgrantz/unh-dashboard/tree/master/fakedata.
-  
-  #campus_data<-read.csv(url("https://raw.githubusercontent.com/sowmyavs1992/data_science_1/master/dummy_data_campus_curve.csv"))
-  
-  
   #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
   output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
                                                    choices = c(unique(tecCampusfinal$campus)), 
@@ -271,56 +258,6 @@ function(input, output) {
       theme_bw()
     
   })
-  
-  
-  # TO DO: make sure calculation of number isolated matches final data format
-  # TO DO -- CHANGE THIS TO DIFFERENT OBJECT to pull isolation numbers
-  n_isol <- 0
-  
-  # TO DO: make sure calculation of number isolated + symptomatic matches final data format
-  n_isol_sym <- 0
-  
-  # TO DO: make sure calculation of number isolated + symptomatic matches final data format
-  n_quar_no <-  0
-  
-  ## don't know what this number is to put in dummy data. TO DO: Find out what this number is
-  n_test_no <- 0
-  
-  # output$n_isol_label <- renderUI({box(
-  #  strong("# active cases in isolation"),
-  # br(), 
-  #em("Total (symptomatic)"),
-  #width=4, 
-  #height=80)})
-  
-  #output$n_isol_value <- renderUI({box(
-  # h4(glue("{n_isol}", "  (", "{n_isol_sym}", ")")),
-  #width=4, 
-  #height=60)})
-  
-  #output$n_quar_label <- renderUI({box(
-  # strong("# of Durham quarantined"), 
-  #br(), 
-  #em("Total"),
-  #width=4,
-  #height=80
-  #)})
-  
-  #output$n_quar_value <- renderUI({box(
-  # h4(n_quar_no,
-  #width=4,
-  #height=60)})
-  
-  #output$n_test_label <- renderUI({box(
-  # strong("Days from test to isolation"), 
-  #em("7-day median"),
-  #width=4,
-  #height=80)})
-  
-  #output$n_test_value <- renderUI({box(
-  # h4(n_test_no),
-  #  width=4,
-  # height=60)})
   
   
   #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
