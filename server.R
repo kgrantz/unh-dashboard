@@ -169,7 +169,7 @@ function(input, output) {
   })
   
   output$pct_isol_durham <- renderUI({box(
-    glue("{threshdf[1,4]}"),
+    glue("{threshdf[1,5]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[1,4], c(-1, 10, 50, 90)),
@@ -177,14 +177,14 @@ function(input, output) {
   )})
   
   output$pct_isol_manch <- renderUI({box(
-    glue("{threshdf[2,4]}"),
+    glue("{threshdf[2,5]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,4], c(-1, 10, 50, 90))
   )})
   
   output$pct_isol_concord <- renderUI({box(
-    glue("{threshdf[3,4]}"),
+    glue("{threshdf[3,5]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,4], c(-1, 10, 50, 90))
@@ -196,21 +196,21 @@ function(input, output) {
   })
   
   output$pct_quar_durham <- renderUI({box(
-    glue("{threshdf[1,5]}"),
+    glue("{threshdf[1,4]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[1,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_manch <- renderUI({box(
-    glue("{threshdf[2,5]}"),
+    glue("{threshdf[2,4]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_concord <- renderUI({box(
-    glue("{threshdf[3,5]}"),
+    glue("{threshdf[3,4]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,5], c(-1, 25, 50, 90))
@@ -364,12 +364,12 @@ function(input, output) {
   
   output$testing_plot <- renderPlot({
     
-    date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date)+1)
-    date_breaks = unique(tecCampusfinal$date)
+    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
+    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
     gtest <- ggplot() +
-      geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity") +
+      geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
       scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
-      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",limits = date_limits) +
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.3,0.5))) +
       scale_y_continuous(name="") +
       theme_minimal() +
       theme(axis.ticks.x=element_blank(),
@@ -377,6 +377,7 @@ function(input, output) {
             legend.position = "top")
 
     glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
       geom_text(aes(x=date, y=2, label=pct_pos_label)) +
       geom_text(aes(x=date, y=3.5, label=n_pos)) +
       geom_text(aes(x=date, y=5, label=n_tot)) +
@@ -417,7 +418,7 @@ function(input, output) {
     gtest <- ggplot_gtable(ggplot_build(gtest))
     gtest$widths <-glabel$widths 
     
-    grid.arrange(gtest, glabel)
+    grid.arrange(gtest, glabel,heights=c(10,3))
     
   })
   
