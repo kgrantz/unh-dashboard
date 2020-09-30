@@ -16,7 +16,7 @@ dashboardPage(
       id="tabs",
       dateInput("InputDate",
       ##for now we are keeping the value fixed on Sep
-                "Display Data From:",value=Sys.Date(), min="2020-09-23", max=Sys.Date()),
+                "Display Data From:",value=Sys.Date(), min="2020-09-23", max=Sys.Date(),datesdisabled = as.Date(remove_dates)),
       menuItem("Dashboard", 
                tabName = "dashboard", 
                icon = icon("dashboard")),
@@ -164,7 +164,7 @@ dashboardPage(
                
                # numeric indicators
                # TO DO: figure out how to remove gray bars?
-               div(style = "font-size: 13px;",##reducing font size to fit things in
+               div(style = "font-size: 14px;",##reducing font size to fit things in
                    fluidRow(
                      uiOutput("n_isol_label"),
                      #),
@@ -181,7 +181,7 @@ dashboardPage(
                # now conditional to only display if campus = Durham
                conditionalPanel(
                  'input.Campus == "UNH Durham"',
-                 fluidRow(
+                 box(width=NULL, solidHeader=TRUE,
                    div(style = "font-size: 12px;", ##reducing font size.
                        fluidRow(
                          dataTableOutput("mytable"),
@@ -193,13 +193,17 @@ dashboardPage(
                
         ),# END lefthand column
         
-        column(width=6, ## START righthand column
-               box(
-                 status="primary",
-                 width=NULL,
-                 solidHeader = TRUE,
-                 title = "Testing Statistics",
-                 plotOutput("testing_plot"), # TO DO: fix dimensions to server dimensions if needed
+        column(width=6,
+               ## START righthand column
+               tabBox(title = h5("Testing Curve"),
+                        # The id lets us use input$tabset1 on the server to find the current tab
+                        id = "campus_epi_curve",
+                        width=NULL,
+                        height=600,
+                        tabPanel("Overall", plotOutput("testing_plot"),height=550),
+                        tabPanel("On / Off campus"),
+                        tabPanel("Student / Faculty")
+                ), # TO DO: fix dimensions to server dimensions if needed
                  br(),
                  fluidRow(
                    uiOutput("lab_delay_label"),
@@ -207,7 +211,8 @@ dashboardPage(
                    uiOutput("lab_quest_label"),
                    uiOutput("lab_cmd_label")
                  )
-               ) # END box
+               #)##end box
+               #) # END box
         ) # END righthand column
         
       ) # END campus page

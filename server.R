@@ -6,10 +6,16 @@ function(input, output) {
   library(htmltools)
   library(gridExtra)
   
+  data_dates <- as.Date(list.dirs(path = "./data", full.names = FALSE, recursive = FALSE))
+  
+  all_dates <- seq(from=as.Date("2020-09-23"),Sys.Date(),"days")
+  
+  remove_dates <- as.Date(all_dates[is.na(match(all_dates,data_dates))])
+  
   observeEvent(input$InputDate,{ 
 
   filter_date=as.character(input$InputDate)
-  
+   
   filename <- paste0("data/",filter_date,"/processed_data.Rdata")
   
   load(filename)
@@ -343,7 +349,7 @@ function(input, output) {
   output$mytable = renderDataTable({
     DT::datatable(
       Dorm_tab,
-      options = list(dom="t"),
+      options = list(dom="tp", pageLength=6),
       container = dorm_table
     )
   })
@@ -414,7 +420,7 @@ function(input, output) {
     gtest <- ggplot_gtable(ggplot_build(gtest))
     gtest$widths <-glabel$widths 
     
-    grid.arrange(gtest, glabel)
+    grid.arrange(gtest, glabel, heights=c(12,5))
     
   })
   
