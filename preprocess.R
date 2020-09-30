@@ -1,6 +1,4 @@
 
-#### UNH PREPROCESS SCRIPT
-
 #### Environment + Data Load ----------------------- ####
 
 require(tidyverse)
@@ -258,47 +256,47 @@ routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("
 ### Campus specific numbers: included in thresholds data  ------------------------------- 
 ### included in thresholds data
 
-    ### Dorm-specific campus table  ------------------------------- 
-    ### FORREST
-    # data frame with cumulative counts
-    #   column campus
-    #   column dorms (with off campus) -- intersection of (off_campus, campus)
-    #   column incident cases (new positive tests) in last 10 days
-    #   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 days) 
-    #   # quarantined
-    #   % all beds occupied
-    # TO DO: decide if this is best "% positive" metric or want something different
-    
-    
+### Dorm-specific campus table  ------------------------------- 
+### FORREST
+# data frame with cumulative counts
+#   column campus
+#   column dorms (with off campus) -- intersection of (off_campus, campus)
+#   column incident cases (new positive tests) in last 10 days
+#   column % positive (# incident cases / # with at least one test result (positive/negative) in last 10 days) 
+#   # quarantined
+#   % all beds occupied
+# TO DO: decide if this is best "% positive" metric or want something different
 
-    # Currently quarantined from dorms
-    quardorm <- isolationquarantine %>% 
-      #limit to those which have an entry date before
-      filter(quar_entrydate<=Sys.Date()) %>%
-      #limit to those who have an exit day after
-      filter(quar_exitdate>Sys.Date()) %>%
-      distinct(uid)%>%
-      left_join(individualdemographics)%>%
-      group_by(dorm)%>%
-      summarize(quarantined=n())
-    
-    # number of people who are being tested (should this be our denominator???)
-    censusdorm <- distinct(individualdemographics,uid,dorm,campus) %>%
-      group_by(dorm,campus) %>%
-      summarize(pop=n())
-    
-    # dorm table
-    # TO DO: add row with "Off campus: Students" and "Off campus: Faculty/Staff/Emp"
-    dormdf <- cases10 %>% group_by(campus, dorm) %>%
-      summarize(cases=n()) %>%
-      full_join(censusdorm) %>%
-      filter(!is.na(dorm)) %>%
-      mutate(cases=ifelse(is.na(cases),0,cases))%>%
-      mutate(rate=cases/pop*1000) %>%
-      arrange(-rate) %>%
-      left_join(quardorm) %>%
-      mutate(quarantined=ifelse(is.na(quarantined),0,quarantined))
-        
+
+
+# Currently quarantined from dorms
+quardorm <- isolationquarantine %>% 
+  #limit to those which have an entry date before
+  filter(quar_entrydate<=Sys.Date()) %>%
+  #limit to those who have an exit day after
+  filter(quar_exitdate>Sys.Date()) %>%
+  distinct(uid)%>%
+  left_join(individualdemographics)%>%
+  group_by(dorm)%>%
+  summarize(quarantined=n())
+
+# number of people who are being tested (should this be our denominator???)
+censusdorm <- distinct(individualdemographics,uid,dorm,campus) %>%
+  group_by(dorm,campus) %>%
+  summarize(pop=n())
+
+# dorm table
+# TO DO: add row with "Off campus: Students" and "Off campus: Faculty/Staff/Emp"
+dormdf <- cases10 %>% group_by(campus, dorm) %>%
+  summarize(cases=n()) %>%
+  full_join(censusdorm) %>%
+  filter(!is.na(dorm)) %>%
+  mutate(cases=ifelse(is.na(cases),0,cases))%>%
+  mutate(rate=cases/pop*1000) %>%
+  arrange(-rate) %>%
+  left_join(quardorm) %>%
+  mutate(quarantined=ifelse(is.na(quarantined),0,quarantined))
+
 
 
 ### Testing epi curve ------------------------------- 
@@ -384,10 +382,11 @@ save(file=filename,
               "state_curr_hosp",
               "state_curr_cond",
               "routinetesting_demograph_epi_curve",
+              "routinetesting_campus_location",
+              "routinetesting_campus_personnel",
               "threshdf",
               "dormdf",
               "tecCampusfinal",
               "pct_pos",
               "pct_pos_daily"
-              ))
-
+     ))
