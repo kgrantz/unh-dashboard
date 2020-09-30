@@ -5,6 +5,11 @@ function(input, output) {
   library(DT)
   library(htmltools)
   library(gridExtra)
+  data_dates <- as.Date(list.dirs(path = "./data", full.names = FALSE, recursive = FALSE))
+  
+  all_dates <- seq(from=as.Date("2020-09-23"),Sys.Date(),"days")
+  
+  remove_dates <- as.Date(all_dates[is.na(match(all_dates,data_dates))])
   
   observeEvent(input$InputDate,{ 
 

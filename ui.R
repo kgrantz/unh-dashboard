@@ -16,7 +16,7 @@ dashboardPage(
       id="tabs",
       dateInput("InputDate",
       ##for now we are keeping the value fixed on Sep
-                "Display Data From:",value=Sys.Date(), min="2020-09-23", max=Sys.Date()),
+      "Display Data From:",value=max(as.Date(data_dates)), min="2020-09-23", max=Sys.Date(),datesdisabled = as.Date(remove_dates)),
       menuItem("Dashboard", 
                tabName = "dashboard", 
                icon = icon("dashboard")),
