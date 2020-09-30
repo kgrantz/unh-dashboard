@@ -359,16 +359,17 @@ function(input, output) {
   
   tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
   
+    
 
   
   output$testing_plot <- renderPlot({
     
-    date_limits <- c(min(tecCampusfinal$date), max(tecCampusfinal$date))
+    date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date)+1)
     date_breaks = unique(tecCampusfinal$date)
     gtest <- ggplot() +
       geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity") +
       scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
-      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d", limits = date_limits) +
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",limits = date_limits) +
       scale_y_continuous(name="") +
       theme_minimal() +
       theme(axis.ticks.x=element_blank(),
@@ -393,7 +394,6 @@ function(input, output) {
         axis.title.y = element_blank(),
         plot.title = element_blank()
       )
-    
     # glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
     #   geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
     #   geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
