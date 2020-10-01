@@ -367,7 +367,7 @@ function(input, output) {
     #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
     date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
     gtest <- ggplot() +
-      geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
+      geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result)), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
       scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.3,0.5))) +
       scale_y_continuous(name="") +
@@ -460,5 +460,3 @@ function(input, output) {
 })
 }
 #)
-
-
