@@ -12,6 +12,7 @@ dashboardPage(
   ##added conditional dropdown for campus tab
   dashboardSidebar(
     width=240,
+    h5("Draft"),
     sidebarMenu(
       id="tabs",
       dateInput("InputDate",
@@ -30,7 +31,10 @@ dashboardPage(
       br(),
       br(),
       textOutput("date_updated")
-    ) # END sidebarMenu
+    ), # END sidebarMenu
+    br(),
+    br(),
+    em("This application is currently a DRAFT and not a finalized version")
   ), # END sidebar
   
   ## BODY --------------- 
