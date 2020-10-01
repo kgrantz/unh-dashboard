@@ -1,227 +1,464 @@
-#function(request) 
-dashboardPage(
+#shinyServer(
+
+function(input, output) {
+  library(tidyverse)
+  library(DT)
+  library(htmltools)
+  library(gridExtra)
   
   
+
   
-  # HEADER --------------- 
-  dashboardHeader(
-    title = "UNH Dashboard"
-  ), # end header
+  observeEvent(input$InputDate,{ 
+
+  filter_date=as.character(input$InputDate)
   
-  ## SIDEBAR --------------- 
-  ##added conditional dropdown for campus tab
-  dashboardSidebar(
-    width=240,
-    h5("Draft"),
-    sidebarMenu(
-      id="tabs",
-      dateInput("InputDate",
-      ##for now we are keeping the value fixed on Sep
-      "Display Data From:",value=max(as.Date(data_dates)), min="2020-09-23", max=Sys.Date(),datesdisabled = as.Date(remove_dates)),
-      menuItem("Dashboard", 
-               tabName = "dashboard", 
-               icon = icon("dashboard")),
-      menuItem("Campus", 
-               tabName = "campus",
-               icon = icon("university")),
-      conditionalPanel(
-        'input.tabs == "campus"',
-        menuItemOutput("campus_dropdown")
-      ),
-      br(),
-      br(),
-      textOutput("date_updated")
-    ), # END sidebarMenu
-    br(),
-    br(),
-    em("This application is currently a DRAFT and not a finalized version")
-  ), # END sidebar
+  filename <- paste0("data/",filter_date,"/processed_data.Rdata")
   
-  ## BODY --------------- 
-  dashboardBody(
-    #universal HTML tag to center-align all boxes, remove shadow borders
-    tags$style(HTML("div{text-align: center
-                                }
-                     #box1{height: 60px;
-                     }
-                    .box{-webkit-box-shadow: none; 
-                    -moz-box-shadow: none;
-                    box-shadow: none;}
-                     #mytable {
-                     width: 80px;
-                     }
-                     ")),
-    tabItems(
-      ## Home --------------------------------------------------------------------
-      tabItem(
-        tabName = "dashboard",
-        div(style = "margin-top:-1em",  ##shaving off annoying blank space from the top
-            h4(strong("University of New Hampshire COVID-19 Dashboard"))#the html was interfering with render plot below. Need to figure out a workaround to display the data
-        ),
-        column(width=6,
-               fluidRow(
-                 box(status="primary",
-                     width=NULL,
-                     solidHeader = TRUE,
-                     title = "Confirmed COVID-19 Cases in UNH Community",
-                     plotOutput("epi_curve_total", height=248)
-                 )# end box
-               ),#end fluid row
-               fluidRow(
-                 box(
-                   status="primary",
-                   solidHeader = TRUE,
-                   width=NULL,
-                   title = "Statewide conditions",
-                   fluidRow(
-                     uiOutput("state_case_label"),
-                     uiOutput("hospitalization_label"), 
-                     uiOutput("current_restrictions_label")
-                   ),
-                   fluidRow(
-                     uiOutput("state_case"),
-                     uiOutput("hospitalization"),
-                     uiOutput("current_restrictions")
-                   ),#end fluid row
-                   fluidRow(
-                     textOutput("state_date_updated")
-                   )
-                 )#end box
-               )#end fluid row
-        ),#end Column 1
-        
-        column(
-          width=6,
-          div(style = "font-size: 16px; vertical-align: middle",
-              box(
-                status="primary",
-                width=NULL,
-                solidHeader=TRUE,
-                title="College Operating Conditions",
-                div(style = "margin-top:0.04em;",
-                    fluidRow(
-                      box("",width=3,height=30, style="font-weight: bold",solidHeader=TRUE),
-                      box("Durham",width=3,height=30,style="font-weight: bold; font-size: 13px",solidHeader=TRUE),
-                      box("Manchester",width=3,height=30,style="font-weight: bold;font-size: 13px",solidHeader=TRUE),
-                      box("Concord",width=3,height=30,style="font-weight: bold;font-size: 13px",solidHeader=TRUE),
-                    )
-                ),
-                fluidRow(
-                  box("Active Cases",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  uiOutput("active_cases_durham"),
-                  uiOutput("active_cases_manch"),
-                  uiOutput("active_cases_concord")
-                ),
-                fluidRow(
-                  box("Case Rate",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  uiOutput("case_rates_durham"),
-                  uiOutput("case_rates_manch"),
-                  uiOutput("case_rates_concord")
-                ),
-                fluidRow(
-                  # TO DO: change to % isolation beds when that data is available
-                  # box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  box("# in Isolation",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  uiOutput("pct_isol_durham"),
-                  uiOutput("pct_isol_manch"),
-                  uiOutput("pct_isol_concord")
-                ),
-                fluidRow(
-                  # TO DO: change to % quarantine beds when that data is available
-                  # box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  box("# in Quarantine", width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  uiOutput("pct_quar_durham"),
-                  uiOutput("pct_quar_manch"),
-                  uiOutput("pct_quar_concord")
-                )
-              ) # end box
-          ) # end div
-        )# End column 2
-      ),# END tabItem
-      
-      ## Campus --------------------------------------------------------------------
-      tabItem(
-        tabName="campus", 
-        div(style = "margin-top:-1em", #the html was interfering with render plot below. Need to figure out a workaround to display the data
-            
-            h4(strong(textOutput("campus_text")))
-        ),
-        
-        ## START: lefthand column/box
-        
-        column(width = 6,
-               style = "background-color:#FFFFFF;", #Gave a uniform white background to the column. Remove if needed
-               height=NULL,
-               
-               # epi curve - tabset box with tabs for different views
-               fluidRow(
-                 tabBox(title = h5("Epidemic Curve"),
-                        # The id lets us use input$tabset1 on the server to find the current tab
-                        id = "campus_epi_curve",
-                        width=NULL,
-                        height=240,
-                        tabPanel("On / Off campus", plotOutput("location_plot",height=200)),
-                        tabPanel("Student / Faculty", plotOutput("personnel_plot",height=200))
-                 )
-                 
-               ),# end fluidRow
-               
-               # numeric indicators
-               # TO DO: figure out how to remove gray bars?
-               div(style = "font-size: 13px;",##reducing font size to fit things in
-                   fluidRow(
-                     uiOutput("n_isol_label"),
-                     #),
-                     #fluidRow(
-                     uiOutput("n_quar"),
-                     #),
-                     #),
-                     #fluidRow(
-                     uiOutput("n_test"))
-               ), # end fluidRow
-               
-               
-               # Dorm table
-               # now conditional to only display if campus = Durham
-               conditionalPanel(
-                 'input.Campus == "UNH Durham"',
-                 fluidRow(
-                   div(style = "font-size: 12px;", ##reducing font size.
-                       fluidRow(
-                         dataTableOutput("mytable"),
-                         width=NULL,
-                         height=70)
-                   )
-                 ) # end fluidRow
-               ) # end conditional panel
-               
-        ),# END lefthand column
-        
-        column(width=6, ## START righthand column
-               box(
-                 status="primary",
-                 width=NULL,
-                 solidHeader = TRUE,
-                 title = "Testing Statistics",
-                 plotOutput("testing_plot"), # TO DO: fix dimensions to server dimensions if needed
-                 br(),
-                 fluidRow(
-                   uiOutput("lab_delay_label"),
-                   uiOutput("lab_unh_label"), 
-                   uiOutput("lab_quest_label"),
-                   uiOutput("lab_cmd_label")
-                 )
-               ) # END box
-        ) # END righthand column
-        
-      ) # END campus page
-    )
+  load(filename)
+  
+  # TO DO: in UI, restrict available date choices to those with data available
+  # OR: just roll back to the date with available data <= selected date; should add a label to sidebar saying 
+  # date of data is being used, since it might not match selection
+  
+  #Sys.sleep(2)
+  #waiter_hide()
+  
+  ## Home page -----------------------------------------------------------------
+  output$date_updated <- renderText({glue("Last updated: ", "{updated.date}")})
+  
+  ## EPI CURVE ---------
+  data_random <- reactive({ 
+    data.frame(x=sample(1:10),y=sample(1:10))
     
-  ) # END tabItems
-) # END dashboardBody
-#) # END dashboardPage
-#} # END function
+  })
+  
+  output$epi_curve_total <- renderPlot({
+    p = ggplot(epi_curve_overall_week, aes(week_start_date, cases)) +
+          geom_bar(stat="identity", fill="darkblue") +
+          labs(x="Week",y="Cases", title='Total new cases diagnosed per week') +
+          theme(axis.title.x=element_blank(),
+                axis.text.x=element_text(angle=90),
+                axis.ticks.x=element_blank()) +
+          theme_bw()
+    p
+  })
+  
+  
+  ## STATEWIDE SITUATION ---------
+  
+  #Number of Cases
+  output$state_case_label <- renderUI({box(
+    strong("Statewide Cases"), 
+    br(),
+    em("Current Infections"),
+    width=4,
+    height=40,
+    solidHeader=TRUE
+  )})
+  
+  output$state_case <- renderUI({box(
+    state_curr_cases,
+    width=4,
+    background=pick_color_threshold_numeric(state_curr_cases, c(0, 100, 1200, 1800)),
+    href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
+  )})
+  
+  #Hospitalization
+  output$hospitalization_label <- renderUI({box(
+    strong("Statewide"),
+    strong("Hospitalized"),
+    width=4,
+    height=40,
+    solidHeader=TRUE
+  )})
+  
+  output$hospitalization <- renderUI({box(
+    state_curr_hosp,
+    width=4,
+    background=pick_color_threshold_numeric(state_curr_hosp, c(0, 25, 50, 100)),
+    href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
+  )})
+  
+  
+  #Current Restrictions
+  output$current_restrictions_label <- renderUI({box(
+    strong("Current"),
+    strong("Restrictions"),
+    width=4,
+    height=40,
+    solidHeader=TRUE
+  )})
+  
+  output$current_restrictions <- renderUI({box(
+    state_curr_cond,
+    width=4,
+    background=ifelse(state_curr_cond=="None",
+                      "green",
+                      ifelse(state_curr_cond == "Open",
+                             "yellow",
+                             ifelse(state_curr_cond=="Limited Open", "orange", "red"))),
+    href="https://www.covidguidance.nh.gov/"
+  )})
+  
+  output$state_date_updated <- renderText({glue("State conditions last updated: ", "{state.updated.date}")})
+  
+  ## CAMPUS SITUATION ---------
+  
+  ## active cases
+  random_active_cases <- reactive({
+    sample(0:200, 3)
+  })
+  
+  output$active_cases_durham <- renderUI({box(
+    threshdf[1,2],
+    width=3, 
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[1,2], c(-1, 10, 50, 200)),
+    solidHeader = TRUE
+  )})
+  
+  output$active_cases_manch <- renderUI({box(
+    threshdf[2,2],
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[2,2], c(-1, 10, 50, 200)),
+    solidHeader=TRUE
+  )})
+  
+  output$active_cases_concord <- renderUI({box(
+    threshdf[3,2],
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[3,2], c(-1, 10, 50, 200)),
+    solidHeader=TRUE
+  )})
+  
+  ## case rates
+  random_case_rates <- reactive({
+    sample(0:200, 3)
+  })
+  
+  output$case_rates_durham <- renderUI({box(
+    glue("{round(threshdf[1,3],2)} per 1000"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[1,3], c(-1, 5, 100, 200)),
+    solidHeader=TRUE
+  )})
+  
+  output$case_rates_manch <- renderUI({box(
+    glue("{round(threshdf[2,3],2)} per 1000"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[2,3], c(-1, 5, 100, 200)),
+    solidHeader=TRUE
+  )})
+  
+  output$case_rates_concord <- renderUI({box(
+    glue("{round(threshdf[3,3],2)} per 1000"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[3,3], c(-1, 5, 100, 200)),
+    solidHeader=TRUE
+  )})
+  
+  ## pct isol
+  random_pct_isol <- reactive({
+    sample(0:100, 3)
+  })
+  
+  output$pct_isol_durham <- renderUI({box(
+    glue("{threshdf[1,5]}"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[1,4], c(-1, 10, 50, 90)),
+    solidHeader=TRUE
+  )})
+  
+  output$pct_isol_manch <- renderUI({box(
+    glue("{threshdf[2,5]}"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[2,4], c(-1, 10, 50, 90))
+  )})
+  
+  output$pct_isol_concord <- renderUI({box(
+    glue("{threshdf[3,5]}"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[3,4], c(-1, 10, 50, 90))
+  )})
+  
+  ## pct quar
+  random_pct_quar <- reactive({
+    sample(0:100, 3)
+  })
+  
+  output$pct_quar_durham <- renderUI({box(
+    glue("{threshdf[1,4]}"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[1,5], c(-1, 25, 50, 90))
+  )})
+  
+  output$pct_quar_manch <- renderUI({box(
+    glue("{threshdf[2,4]}"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[2,5], c(-1, 25, 50, 90))
+  )})
+  
+  output$pct_quar_concord <- renderUI({box(
+    glue("{threshdf[3,4]}"),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(threshdf[3,5], c(-1, 25, 50, 90))
+  )})
+  
+  ## UNH Campus Situation -------------------------------------------------------
+  
+  #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
+  output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
+                                                   choices = c(unique(tecCampusfinal$campus)), 
+                                                   selected = "Durham")
+  )
+  
+  #getting campus value from UI
+  campus_opt <- reactive(input$Campus)
+  
+  
+  #dynamic header for campus tab
+  output$campus_text <- renderText({
+    paste("Confirmed COVID-19 cases in",input$Campus,sep=" ")
+  })
+  
+  #plot for On/Off Campus split
+  output$location_plot <- renderPlot({
+    
+    ggplot(subset(routinetesting_campus_location, campus==campus_opt()), aes(week_start_date, cases,fill=level)) +
+      geom_bar(stat="identity") +
+      labs(x="Week",y="Cases", title='Total new cases diagnosed per week on/off campus')+
+      scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_text(angle=90),
+            axis.ticks.x=element_blank()) +
+      theme_bw()
+    
+  })
+  
+  
+  #plot for student/faculty split
+  output$personnel_plot <- renderPlot({
+    
+    ggplot(subset(routinetesting_campus_personnel, campus==campus_opt()), aes(week_start_date, cases,fill=level)) +
+      geom_bar(stat="identity") +
+      labs(x="Week",y="Cases", title='Total new cases diagnosed per week among students and faculty')+
+      scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
+      theme(axis.title.x=element_blank(),
+            axis.text.x=element_text(angle=90),
+            axis.ticks.x=element_blank()) +
+      theme_bw()
+    
+  })
+  
+  
+  #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
+  #other preferences
+  output$n_isol_label <- renderUI({box(
+    strong("# individuals in isolation"),
+    br(), 
+    em("Total"),
+    br(),
+    #em("Total  (symptomatic)"),
+    #br(),
+    h4(strong(threshdf$isolated[threshdf$campus == campus_opt()])),
+    width=5, 
+    height=80,
+    solidHeader = TRUE)})
+  # TO DO: commented out symptomatic because we don't have that data yet
+  
+  output$n_quar <- renderUI({box(
+    strong(paste0("# individuals in quarantine")), 
+    br(), 
+    em("Total"),
+    br(),
+    h4(strong(threshdf$quarantined[threshdf$campus == campus_opt()])),
+    width=6,
+    height=80,
+    solidHeader = TRUE)})
+  
+  output$n_test <- renderUI({box(
+    # strong("Days from test to isolation"), 
+    # br(), 
+    # em("7-day median"),
+    # br(),
+    # h4(strong(n_test_no)),
+    width=1,
+    height=80,
+    solidHeader = TRUE)})
+    # TO DO: commented out because we do not have this data yet; change widths if we begin to include this again
+  
+  
+  # dorm table - only needed for UNH Durham currently
+  # TO DO: figure out why subseting with campus_opt() did not work
+  Dorm_tab <- subset(dormdf,campus=="UNH Durham")
+  
+  if(nrow(Dorm_tab)<1){
+    # dummy data for when there are no dorms available
+    # not actually shown currently, but to make sure nothing funky happens
+    dorm <- campus_opt
+    cases <- threshdf$cases[threshdf$campus==campus_opt()]
+    rate <- threshdf$rate[threshdf$campus==campus_opt()]
+    quarantined <- threshdf$quarantined[threshdf$campus==campus_opt()]
+    
+    Dorm_tab <- cbind(dorm,cases,rate,quarantined)
+  }else{
+    Dorm_tab <- Dorm_tab %>%
+                ungroup() %>%
+                select(dorm, cases, rate, quarantined) %>%
+                mutate(rate = round(rate, 2)) %>%
+                arrange(desc(cases))
+    
+    Dorm_tab <- as.matrix(Dorm_tab)
+  }
+  
+  #table out to UI
+  dorm_table = htmltools::withTags(table(
+    style = "font-size: 100%; width: 95%; height:70%;  background-color:#FFFFFF;margin-top = -1em",
+    class = 'display',
+    thead(
+      tr(
+        th(rowspan = 2, "Dorm"),
+        th(colspan = 1, "Active Cases"),
+        th(colspan = 1, "Active Cases"),
+        th(colspan = 1, "# Quarantined")
+      ),
+      tr(
+        th("(10-day total)"),
+        th("per 1000 population"),
+        th("from dorm")
+      )
+      
+    )
+  ))
+  
+  output$mytable = renderDataTable({
+    DT::datatable(
+      Dorm_tab,
+      options = list(dom="t"),
+      container = dorm_table
+    )
+  })
+  
+  
+  ## Lab Testing --------------------------------------------------------
+  
+  ## Lab testing plot/numbers
+  # TO DO (lower priority) -- add hover to the plot for the daily counts of each category
+  
+  tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
+  
+    
 
+  
+  output$testing_plot <- renderPlot({
+    
+    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
+    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
+    gtest <- ggplot() +
+      geom_bar(data=subset(tecCampusfinal,campus==campus_opt()), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
+      scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.3,0.5))) +
+      scale_y_continuous(name="") +
+      theme_minimal() +
+      theme(axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=90),
+            legend.position = "top")
 
+    glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
+      geom_text(aes(x=date, y=2, label=pct_pos_label)) +
+      geom_text(aes(x=date, y=3.5, label=n_pos)) +
+      geom_text(aes(x=date, y=5, label=n_tot)) +
+      scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
+      theme_minimal() +
+      theme(
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=11),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_blank()
+      )
+    # glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
+    #   geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
+    #   geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
+    #   geom_text(aes(x=week_no, y=15, label=n_tot)) +
+    #   scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
+    #   theme_minimal() +
+    #   theme(
+    #     panel.grid.major = element_blank(), 
+    #     panel.grid.minor = element_blank(),
+    #     panel.border = element_blank(),
+    #     axis.line = element_blank(),
+    #     axis.text.x = element_blank(),
+    #     axis.text.y = element_text(size=11),
+    #     axis.ticks = element_blank(),
+    #     axis.title.x = element_blank(),
+    #     axis.title.y = element_blank(),
+    #     plot.title = element_blank()
+    #   )
+    
+    glabel <- ggplot_gtable(ggplot_build(glabel))
+    gtest <- ggplot_gtable(ggplot_build(gtest))
+    gtest$widths <-glabel$widths 
+    
+    grid.arrange(gtest, glabel,heights=c(10,3))
+    
+  })
+  
+  
+  ## Lab delay labels
+  # TO DO: this is currently commented out since data is not yet available
+  
+  # output$lab_delay_label <- renderUI({box(
+  #   width=6,
+  #   height=80,
+  #   p("Median days from sample collection to test result day"),
+  #   solidHeader=TRUE
+  # )})
+  # 
+  # output$lab_unh_label <- renderUI({box(
+  #   h4(random_delays()[1]),
+  #   em("UNH"),
+  #   width=2, 
+  #   height=80,
+  #   solidHeader = TRUE
+  # )})
+  # 
+  # output$lab_quest_label <- renderUI({box(
+  #   h4(random_delays()[2]),
+  #   em("Quest"),
+  #   width=2, 
+  #   height=80,
+  #   solidHeader = TRUE
+  # )})
+  # 
+  # output$lab_cmd_label <- renderUI({box(
+  #   h4(random_delays()[3]),
+  #   em("CMD"),
+  #   width=2, 
+  #   height=80,
+  #   solidHeader = TRUE
+  # )})
+    
+})
+}
+#)
 
 
