@@ -3,6 +3,7 @@
 
 require(tidyverse)
 require(aweek)
+require(rvest)
 
 updated.date <- Sys.Date()
 
@@ -74,9 +75,24 @@ epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
 
 ### Statewide conditions ------------------------------- 
 ### Kyra
-state_curr_cases <- 266 
-state_curr_hosp <- 17
+
+##get state conditions website
+statecondurl <- "https://www.nh.gov/covid19/index.htm"
+statecondwebsite <- read_html(statecondurl)
+
+##get state current cases and current hospitalizations
+covid_num <- statecondwebsite %>%
+  html_nodes("td") %>%
+  html_text()
+
+state_curr_cases <- covid_num[4] 
+state_curr_hosp <- covid_num[6]
 state_curr_cond <- "Limited Open"
+
+statedatetimeupdated <- statecondwebsite %>%
+  html_nodes("h4") %>%
+  html_text()
+
 # should be either "None", for no restrictions
 #                  "Open", for restrictions on mass gatherings, otherwise open
 #                  "Limited Open", for many restrictions but not shut-down
@@ -381,6 +397,7 @@ save(file=filename,
               "state_curr_cases",
               "state_curr_hosp",
               "state_curr_cond",
+              "statedatetimeupdated",
               "routinetesting_demograph_epi_curve",
               "routinetesting_campus_location",
               "routinetesting_campus_personnel",
