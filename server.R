@@ -60,7 +60,7 @@ function(input, output) {
   output$state_case <- renderUI({box(
     state_curr_cases,
     width=4,
-    background=pick_color_threshold_numeric(state_curr_cases, c(0, 100, 1200, 1800)),
+    background=pick_color_threshold_numeric(as.numeric(state_curr_cases), c(0, 100, 1200, 1800)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
   )})
   
@@ -76,7 +76,7 @@ function(input, output) {
   output$hospitalization <- renderUI({box(
     state_curr_hosp,
     width=4,
-    background=pick_color_threshold_numeric(state_curr_hosp, c(0, 25, 50, 100)),
+    background=pick_color_threshold_numeric(as.numeric(state_curr_hosp), c(0, 25, 50, 100)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
   )})
   
@@ -101,7 +101,7 @@ function(input, output) {
     href="https://www.covidguidance.nh.gov/"
   )})
   
-  output$state_date_updated <- renderText({glue("State conditions last updated: ", "{state.updated.date}")})
+  output$state_date_updated <- renderText({statedatetimeupdated})
   
   ## CAMPUS SITUATION ---------
   
@@ -119,7 +119,7 @@ function(input, output) {
   )})
   
   output$active_cases_manch <- renderUI({box(
-    threshdf[2,2],
+    threshdf[3,2],
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,2], c(-1, 10, 50, 200)),
@@ -127,7 +127,7 @@ function(input, output) {
   )})
   
   output$active_cases_concord <- renderUI({box(
-    threshdf[3,2],
+    threshdf[2,2],
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,2], c(-1, 10, 50, 200)),
@@ -148,7 +148,7 @@ function(input, output) {
   )})
   
   output$case_rates_manch <- renderUI({box(
-    glue("{round(threshdf[2,3],2)} per 1000"),
+    glue("{round(threshdf[3,3],2)} per 1000"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,3], c(-1, 5, 100, 200)),
@@ -156,7 +156,7 @@ function(input, output) {
   )})
   
   output$case_rates_concord <- renderUI({box(
-    glue("{round(threshdf[3,3],2)} per 1000"),
+    glue("{round(threshdf[2,3],2)} per 1000"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,3], c(-1, 5, 100, 200)),
@@ -177,14 +177,14 @@ function(input, output) {
   )})
   
   output$pct_isol_manch <- renderUI({box(
-    glue("{threshdf[2,5]}"),
+    glue("{threshdf[3,5]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,4], c(-1, 10, 50, 90))
   )})
   
   output$pct_isol_concord <- renderUI({box(
-    glue("{threshdf[3,5]}"),
+    glue("{threshdf[2,5]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,4], c(-1, 10, 50, 90))
@@ -203,14 +203,14 @@ function(input, output) {
   )})
   
   output$pct_quar_manch <- renderUI({box(
-    glue("{threshdf[2,4]}"),
+    glue("{threshdf[3,4]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_concord <- renderUI({box(
-    glue("{threshdf[3,4]}"),
+    glue("{threshdf[2,4]}"),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,5], c(-1, 25, 50, 90))
