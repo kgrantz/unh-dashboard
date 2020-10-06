@@ -185,6 +185,9 @@ threshdf <- cases10 %>%
                          0,isolated)) %>%
   select(-pop)
 
+threshdf <- threshdf[order(threshdf$campus), ]
+  
+
 
 ### Sanity checks  ------------------------------- 
 ### All to add more
