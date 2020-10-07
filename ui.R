@@ -12,7 +12,6 @@ dashboardPage(
   ##added conditional dropdown for campus tab
   dashboardSidebar(
     width=240,
-    h5("Draft"),
     sidebarMenu(
       id="tabs",
       dateInput("InputDate",
