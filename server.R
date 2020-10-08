@@ -397,24 +397,6 @@ function(input, output) {
         axis.title.y = element_blank(),
         plot.title = element_blank()
       )
-    # glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
-    #   geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
-    #   geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
-    #   geom_text(aes(x=week_no, y=15, label=n_tot)) +
-    #   scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
-    #   theme_minimal() +
-    #   theme(
-    #     panel.grid.major = element_blank(), 
-    #     panel.grid.minor = element_blank(),
-    #     panel.border = element_blank(),
-    #     axis.line = element_blank(),
-    #     axis.text.x = element_blank(),
-    #     axis.text.y = element_text(size=11),
-    #     axis.ticks = element_blank(),
-    #     axis.title.x = element_blank(),
-    #     axis.title.y = element_blank(),
-    #     plot.title = element_blank()
-    #   )
     
     glabel <- ggplot_gtable(ggplot_build(glabel))
     gtest <- ggplot_gtable(ggplot_build(gtest))

@@ -315,62 +315,72 @@ tecCampus1 <- routinetesting_w_week %>% left_join(individualdemographics) %>%
   ## TO DO: I think we should show longer timeframe here
   filter(date > (Sys.Date()-14)) %>%
   filter(date <= Sys.Date()) %>%
-  group_by(campus, date,result,week_no) %>%
+  group_by(campus, date,result) %>%
   summarize(tests=n())
 
 tecCampus_levels <- routinetesting_w_week %>% 
   left_join(individualdemographics) %>%
-  #remove those with missing or free text responses or inconclusive
   filter(!is.na(result)) %>%
-  #remove those not on UNH Durham, Manchester or Law
   filter(!is.na(campus)) %>%
-  #only include those conducted in the last two weeks
   filter(date > (Sys.Date()-14)) %>%
   filter(date <= Sys.Date()) %>%
-  group_by(campus, date,result, week_no) %>%
-  summarize(tests=n())
+  group_by(campus, date, user_status_comb, result) %>%
+  summarize(tests=n()) %>%
+  rename(level = user_status_comb)
 
 tecCampusfinal <- tecCampus1 %>%
-  #add zeroes to days missing for each category
-  full_join(expand_grid(campus=unique(tecCampus1$campus),
-                        date=seq.Date(min(tecCampus1$date), 
-                                      Sys.Date(),
-                                      by="days"),
-                        result=unique(tecCampus1$result))) %>%
+  mutate(level = "Total") %>%
+  bind_rows(tecCampus_levels) %>%
+  ungroup() %>%
+  tidyr::complete(campus, date, level, result) %>%
   mutate(tests=ifelse(is.na(tests),0,tests))
 
 ### Testing table ------------------------------- 
-# data frame -- WEEK LEVEL for table
-# summarize the daily table by week to produce columns:
+# data frame -- DAY LEVEL for display under graph, WEEK LEVEL for 2-week table
 # campus
 # week
+# level (student/faculty-staff)
 # n_submitted = sum of all tests collected within that week, regardless of current outcome (include not tested, etc.)
 # n_not_submitted = (all tests that should have been collected - all tests that were collected) 
 # % positive tests = # all positive tests / (# all positive tests + # all negative tests)
 # to figure out what they're doing about pooled samples - does the updated result of a pooled sample go in as a new row (so rows are tests) or are rows just samples
-pct_pos <- tecCampusfinal %>%
-  group_by(week_no, campus) %>%
-  summarise(n_pos = sum(tests[which(result=="Positive")]),
-            n_neg = sum(tests[which(result=="Negative")]),
-            n_tot = sum(tests),
-            pct_pos = n_pos/ ifelse((n_pos + n_neg)==0,1,(n_pos+n_neg)),
-            pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
 
+# Daily table for graph
 pct_pos_daily <- tecCampusfinal %>%
-  group_by(date, campus) %>%
+  group_by(date, campus, level) %>%
   summarise(n_pos = sum(tests[which(result=="Positive")]),
             n_neg = sum(tests[which(result=="Negative")]),
             n_tot = sum(tests),
             pct_pos = n_pos/ ifelse((n_pos + n_neg)==0,1,(n_pos+n_neg)),
             pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
 
-### Testing delays ------------------------------- 
-# we can't really do this yet
-# eventually, data frame of 
-# campus
-# lab
-# median days from sample collection to test results returned in last 2 weeks
+# Week table for overall display 
+# show # tests submitted, # people submitted, # tests per person, # (%) tests with valid results to dashboard
+lab_weekly_table_levels <- routinetesting_w_week %>% 
+                           left_join(individualdemographics) %>%
+                           filter(!is.na(result)) %>%
+                           filter(!is.na(campus)) %>%
+                           filter(date > (Sys.Date()-14)) %>%
+                           filter(date <= Sys.Date()) %>%
+                           group_by(campus, user_status) %>%
+                           summarize(n_test=n(),
+                                     n_ppl_tested=n_distinct(uid),
+                                     n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
+                           rename(level = user_status)
 
+lab_weekly_table <- routinetesting_w_week %>% 
+                     left_join(individualdemographics) %>%
+                     filter(!is.na(result)) %>%
+                     filter(!is.na(campus)) %>%
+                     filter(date > (Sys.Date()-14)) %>%
+                     filter(date <= Sys.Date()) %>%
+                     group_by(campus) %>%
+                     summarize(n_test=n(),
+                               n_ppl_tested=n_distinct(uid),
+                               n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
+                     mutate(level = "Total") %>%
+                     bind_rows(lab_weekly_table_levels) %>%
+                     mutate(n_test_per_pers = n_test/n_ppl_tested)
 
 #### MISC. OBJECTS ------------------------------- ####
 
