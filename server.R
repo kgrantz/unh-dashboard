@@ -362,7 +362,7 @@ function(input, output) {
   tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
   
   ##Changing pct pos label to improve readability  
-  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos ==0 , 0, ifelse(pct_pos_daily$pct_pos < 1,"<1",as.character(round(pct_pos_daily$pct_pos,1))))
+  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos ==0 , 0, ifelse(pct_pos_daily$pct_pos < 0.01,"<1",as.character(round((pct_pos_daily$pct_pos)*100,0))))
   
   output$testing_plot <- renderPlot({
     
