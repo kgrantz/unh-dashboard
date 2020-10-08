@@ -158,8 +158,7 @@ threshdf <- cases10 %>%
   summarize(cases=n()) %>%
   #include the zeroes
   full_join(census) %>%
-  filter(campus %in% c("UNH Durham","UNH LAW",
-                       "UNH Manchester"))%>%
+  filter(!is.na(campus))%>%
   mutate(cases=ifelse(is.na(cases),0,cases)) %>%
   #calculate rate per 1000
   mutate(rate=cases/pop*1000)%>%
