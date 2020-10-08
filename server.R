@@ -223,7 +223,7 @@ function(input, output) {
   #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
   output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
                                                    choices = c(unique(tecCampusfinal$campus)), 
-                                                   selected = "Durham")
+                                                   selected = "UNH DURHAM")
   )
   
   #getting campus value from UI

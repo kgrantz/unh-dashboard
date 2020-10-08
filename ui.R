@@ -183,7 +183,7 @@ dashboardPage(
                # Dorm table
                # now conditional to only display if campus = Durham
                conditionalPanel(
-                 'input.Campus == "UNH Durham"',
+                 'input.Campus == "UNH DURHAM"',
                  fluidRow(
                    div(style = "font-size: 12px;", ##reducing font size.
                        fluidRow(

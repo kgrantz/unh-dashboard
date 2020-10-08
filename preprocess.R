@@ -310,7 +310,7 @@ tecCampus1 <- routinetesting_w_week %>% left_join(individualdemographics) %>%
   #remove those with missing or free text responses or inconclusive
   filter(!is.na(result)) %>%
   #remove those not on UNH Durham, Manchester or Law
-  filter(campus %in% c("UNH Manchester","UNH Durham","UNH LAW")) %>%
+  filter(!is.na(campus)) %>%
   #only include those conducted in the last two weeks
   ## TO DO: I think we should show longer timeframe here
   filter(date > (Sys.Date()-14)) %>%
@@ -323,7 +323,7 @@ tecCampus_levels <- routinetesting_w_week %>%
   #remove those with missing or free text responses or inconclusive
   filter(!is.na(result)) %>%
   #remove those not on UNH Durham, Manchester or Law
-  filter(campus %in% c("UNH Manchester","UNH Durham","UNH LAW")) %>%
+  filter(!is.na(campus)) %>%
   #only include those conducted in the last two weeks
   filter(date > (Sys.Date()-14)) %>%
   filter(date <= Sys.Date()) %>%
