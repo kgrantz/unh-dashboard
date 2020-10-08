@@ -362,7 +362,7 @@ function(input, output) {
   tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
   
   ##Changing pct pos label to improve readability  
-  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos ==0 , 0, ifelse(pct_pos_daily$pct_pos < 1,"<1",as.character(round(pct_pos_daily$pct_pos,1))))
+  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos_day ==0 , 0, ifelse(pct_pos_daily$pct_pos_day < 1,"<1",as.character(round(pct_pos_daily$pct_pos_day,1))))
   
   output$testing_plot <- renderPlot({
     
@@ -381,8 +381,8 @@ function(input, output) {
     glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
       geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-      geom_text(aes(x=date, y=3.5, label=n_pos)) +
-      geom_text(aes(x=date, y=5, label=n_tot)) +
+      geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
+      geom_text(aes(x=date, y=5, label=n_tot_day)) +
       scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
       theme_minimal() +
       theme(
