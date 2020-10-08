@@ -7,9 +7,6 @@ require(rvest)
 
 updated.date <- Sys.Date()
 
-state.updated.date <- as.Date("2020-09-23") 
-# change this to character string if you do not update the state data
-
 routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
   mutate(date=ifelse(is.na(collectdate),
                      as.character(resultsdate),
@@ -30,24 +27,24 @@ routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
 isolationquarantine <- read_csv("raw_data/isolationquarantine.csv")
 
 individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
+  mutate(user_status_comb = recode(user_status,
+                                   Employee="Faculty/Staff",
+                                   Staff="Faculty/Staff",
+                                   Faculty="Faculty/Staff",
+                                   Unknown="Faculty/Staff")) %>%
   mutate(user_status=recode(user_status,
                             Employee="Employee / Staff",
                             Staff="Employee / Staff",
                             Unknown="Employee / Staff" ## per call 9/24, these are mostly contractors
   )) %>%
   ##defining column campus location as its not explicitly defined
-  mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus"))
-
-
+  mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus")) %>%
+  mutate(campus = toupper(campus))
 
 
 #### HOME PAGE ---------------------------------- ####
 
 ### Overall epi curve ------------------------------- 
-### SOWMYA
-# week should be collection date where available, results date where collection date isn't available
-# use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
-# metrics = # new positive cases
 
 # adding week number and week start date for date
 routinetesting_w_week <- routinetesting %>%
@@ -74,13 +71,12 @@ epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
 
 
 ### Statewide conditions ------------------------------- 
-### Kyra
 
-##get state conditions website
+# get state conditions website
 statecondurl <- "https://www.nh.gov/covid19/index.htm"
 statecondwebsite <- read_html(statecondurl)
 
-##get state current cases and current hospitalizations
+# get state current cases and current hospitalizations
 covid_num <- statecondwebsite %>%
   html_nodes("td") %>%
   html_text()
@@ -98,11 +94,10 @@ statedatetimeupdated <- statecondwebsite %>%
 #                  "Limited Open", for many restrictions but not shut-down
 #                  "Limited", for stay-at-home order
 # TO DO: these are poorly defined categories, should come up with something more precise
-# TO DO: figure out if we can api into DHHS data somehow? otherwise write this as an `opt` statement in wrapper script
+# TO DO: determine if we are keeping "state_curr_cond" in dashboard
 
 
 ### Thresholds data frame ------------------------------- 
-### Kyra
 # campus (durham, manchester, concord/law)
 # n_isol = active in isolation as of latest data
 # n_isol_sym = active in isolation + symptomatic as of latest data
@@ -124,14 +119,6 @@ cases10 <- routinetesting %>%
   #only include those conducted in the last two weeks
   filter(date > (Sys.Date()-10)) %>%
   filter(date <= Sys.Date())
-
-# # Currently quarantined
-# quarantined <- isolationquarantine %>% 
-#   #limit to those which have an entry date before
-#   filter(quar_entrydate<=Sys.Date()) %>%
-#   #limit to those who have an exit day after
-#   filter(quar_exitdate>Sys.Date()) %>%
-#   distinct(uid)
 
 # those who are quarantined at the moment
 quardf <- isolationquarantine %>% 
@@ -186,19 +173,10 @@ threshdf <- cases10 %>%
   select(-pop)
 
 threshdf <- threshdf[order(threshdf$campus), ]
-  
-
-
-### Sanity checks  ------------------------------- 
-### All to add more
-# if(n_isol_sym>n_isol){stop("this is wrong")}
-
-
 
 #### CAMPUS PAGE -------------------------------- ####
 
 ### Campus epi curve ------------------------------- 
-### SOWMYA
 # columns: week, var_type, var_level, count
 # week should be collection date where available, results date where collection date isn't available
 # use CDC default for epi-weeks (Sunday - Saturday) -- think there's an epiweek pkg/function
@@ -223,7 +201,7 @@ routinetesting_w_week_demo <- routinetesting_w_week %>%
 campus <- data.frame(campus= unique(individualdemographics$campus))
 
 # personnel column unique values
-personnel <- data.frame(user_status = c("Student","Faculty"))
+personnel <- data.frame(user_status_comb = c("Student","Faculty/Staff"))
 
 # campus location column unique values
 campus_location <- data.frame(campus_location=c("Off Campus","On Campus"))
@@ -253,11 +231,11 @@ routinetesting_campus_location<- routinetesting_w_week_demo[ ,c("result","week_n
 # for personnel location tab; cross join everything to get all required combinations. Then make a level column
 table_levels_user <- merge(campus,personnel) %>%
   merge(weeks)%>%
-  mutate(level=user_status, id="user_status")
+  mutate(level=user_status_comb, id="user_status")
 
 # rolling up date level data to required levels
-routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status")] %>%
-  group_by(week_no, campus,user_status) %>%
+routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status_comb")] %>%
+  group_by(week_no, campus,user_status_comb) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive"))%>%
   right_join(table_levels_user) %>%
@@ -340,6 +318,17 @@ tecCampus1 <- routinetesting_w_week %>% left_join(individualdemographics) %>%
   group_by(campus, date,result,week_no) %>%
   summarize(tests=n())
 
+tecCampus_levels <- routinetesting_w_week %>% 
+  left_join(individualdemographics) %>%
+  #remove those with missing or free text responses or inconclusive
+  filter(!is.na(result)) %>%
+  #remove those not on UNH Durham, Manchester or Law
+  filter(campus %in% c("UNH Manchester","UNH Durham","UNH LAW")) %>%
+  #only include those conducted in the last two weeks
+  filter(date > (Sys.Date()-14)) %>%
+  filter(date <= Sys.Date()) %>%
+  group_by(campus, date,result, week_no) %>%
+  summarize(tests=n())
 
 tecCampusfinal <- tecCampus1 %>%
   #add zeroes to days missing for each category
