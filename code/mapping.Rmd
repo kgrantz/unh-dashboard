@@ -1,0 +1,105 @@
+---
+title: "Mapping UNH Cases"
+author: "Forrest Jones"
+date: "10/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(sf)
+library(tidyverse)
+library(ggrepel)
+
+
+```
+
+### bring in the shape files
+```{r}
+
+box = c(xmin = -71.2, xmax = -70.8,ymin=43,ymax=43.5)
+
+
+BaseMap <- read_sf("shapefiles/UNH_Basemap.shp")
+Buildings <- read_sf("shapefiles/UNH_Buildings.shp")
+
+
+sidewalks <- filter(BaseMap,LAND_USE=="Sidewalk")
+
+
+
+dormlist <- c("CHRISTENSEN HALL",
+              "EATON HOUSE",
+              "ENGELHARDT HALL")
+
+
+
+```
+
+
+### bring in the case data
+```{r}
+
+tests <- read_csv("data/raw_data/routinetesting.csv") %>%
+                left_join(read_csv("data/raw_data/individualdemographics.csv"))
+
+cases <- tests %>% filter(result=="Positive") %>%
+                group_by(dorm) %>%
+                summarise(cases=n()) %>%
+                mutate(BUILDING_N=toupper(dorm))
+
+
+dormlist <- tests %>% filter(!is.na(dorm)) %>%
+                distinct(dorm) %>%
+                mutate(upper=toupper(dorm))
+
+dorms <- filter(Buildings,BUILDING_N %in% dormlist$upper) %>%
+                left_join(cases) %>%
+                mutate(Name=ifelse(cases>=2,BUILDING_N,NA))%>%
+                mutate(centroid=st_centroid(geometry))%>%
+                mutate(centerx=NA,centery=NA)
+
+for (i in seq_len(nrow(dorms))){
+                
+                dorms$centerx[i] <- dorms$centroid[[i]][[1]]
+                dorms$centery[i] <- dorms$centroid[[i]][[2]]
+                
+}
+
+
+
+```
+
+
+# show the cases on the map
+
+
+
+```{r}
+
+# BMgraph <- ggplot(BaseMap) +
+#   geom_sf()
+
+Bgraph <- ggplot(Buildings) +
+  geom_sf()
+
+
+Dgraph<-ggplot(dorms) +
+                geom_sf(col="lightblue",fill="lightblue")+
+                geom_sf(data=sidewalks)+
+                geom_point(aes(size=cases,x=centerx,y=centery),
+                               color="red",alpha=0.5)+
+                geom_text_repel(aes(label=Name,x=centerx,y=centery))+
+                scale_size(limits=c(1,20),breaks=c(5,10,15,20))+
+                theme_void()
+
+
+# ggsave(BMgraph,"figures/basemap.pdf")
+# ggsave("figures/buildings.pdf",Bgraph,device = "pdf")
+ggsave("figures/dorms.pdf",Dgraph,device = "pdf")
+
+
+```
