@@ -342,6 +342,7 @@ tecCampus1 <- routinetesting_w_week %>% left_join(individualdemographics) %>%
 
 
 tecCampusfinal <- tecCampus1 %>%
+<<<<<<< Updated upstream
   #add zeroes to days missing for each category
   full_join(expand_grid(campus=unique(tecCampus1$campus),
                         date=seq.Date(min(tecCampus1$date), 
@@ -349,6 +350,15 @@ tecCampusfinal <- tecCampus1 %>%
                                       by="days"),
                         result=unique(tecCampus1$result))) %>%
   mutate(tests=ifelse(is.na(tests),0,tests))
+=======
+  mutate(level = "Total") %>%
+  bind_rows(tecCampus_levels) %>%
+  ungroup() %>%
+  tidyr::complete(campus, date, level, result) %>%
+  mutate(tests=ifelse(is.na(tests),0,tests)) 
+# NOTE: this is filtered below to only include last 14 days for plot
+# but contains date on last 21 here in order to calculate 7-day average % pos
+>>>>>>> Stashed changes
 
 ### Testing table ------------------------------- 
 # data frame -- WEEK LEVEL for table
@@ -368,6 +378,7 @@ pct_pos <- tecCampusfinal %>%
             pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
 
 pct_pos_daily <- tecCampusfinal %>%
+<<<<<<< Updated upstream
   group_by(date, campus) %>%
   summarise(n_pos = sum(tests[which(result=="Positive")]),
             n_neg = sum(tests[which(result=="Negative")]),
@@ -384,6 +395,57 @@ pct_pos_daily <- tecCampusfinal %>%
 
 
 #### MISC. OBJECTS ------------------------------- ####
+=======
+  group_by(campus, level, result) %>%
+  arrange(date) %>%
+  mutate(sum7 = rollsum(tests)) %>%
+  ungroup() %>%
+  filter(date > (Sys.Date()-14)) %>%
+  group_by(date, campus, level) %>%
+  summarise(n_pos_day = sum(tests[which(result=="Positive")]),
+            n_neg_day = sum(tests[which(result=="Negative")]),
+            n_tot_day = sum(tests),
+            pct_pos_day = n_pos_day/ ifelse((n_pos_day + n_neg_day)==0,1,(n_pos_day+n_neg_day)),
+            pct_pos_day_label = paste0(ceiling(pct_pos_day*100),"%"),
+            n_pos_wk = sum(sum7[which(result=="Positive")]),
+            n_neg_wk = sum(sum7[which(result=="Negative")]),
+            pct_pos_wk = n_pos_wk/ ifelse((n_pos_wk + n_neg_wk)==0,1,(n_pos_wk+n_neg_wk)),
+            pct_pos_wk_label = paste0(ceiling(pct_pos_wk*100),"%"))
+
+# Week table for overall display 
+# show # tests submitted, # people submitted, # tests per person, # (%) tests with valid results to dashboard
+lab_weekly_table_levels <- routinetesting_w_week %>% 
+  left_join(individualdemographics) %>%
+  filter(!is.na(result)) %>%
+  filter(!is.na(campus)) %>%
+  filter(date > (Sys.Date()-14)) %>%
+  filter(date <= Sys.Date()) %>%
+  group_by(campus, user_status) %>%
+  summarize(n_test=n(),
+            n_ppl_tested=n_distinct(uid),
+            n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
+  rename(level = user_status)
+
+lab_weekly_table <- routinetesting_w_week %>% 
+  left_join(individualdemographics) %>%
+  filter(!is.na(result)) %>%
+  filter(!is.na(campus)) %>%
+  filter(date > (Sys.Date()-14)) %>%
+  filter(date <= Sys.Date()) %>%
+  group_by(campus) %>%
+  summarize(n_test=n(),
+            n_ppl_tested=n_distinct(uid),
+            n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
+  mutate(level = "Total") %>%
+  bind_rows(lab_weekly_table_levels) %>%
+  mutate(n_test_per_pers = round(n_test/n_ppl_tested,2))
+
+## filter tec object to be just last 14 days
+tecCampusfinal <- tecCampusfinal %>%
+  filter(date > (Sys.Date()-14))
+  
+  #### MISC. OBJECTS ------------------------------- ####
+>>>>>>> Stashed changes
 
 # leave notes here if you think of other things that would be helpful!
 
@@ -407,6 +469,12 @@ save(file=filename,
               "threshdf",
               "dormdf",
               "tecCampusfinal",
+<<<<<<< Updated upstream
               "pct_pos",
               "pct_pos_daily"
      ))
+=======
+              "pct_pos_daily",
+              "lab_weekly_table"
+     ))
+>>>>>>> Stashed changes

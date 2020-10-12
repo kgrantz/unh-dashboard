@@ -1,13 +1,15 @@
 #shinyServer(
 
-function(input, output) {
+function(input, output, session) {
   library(tidyverse)
   library(DT)
   library(htmltools)
   library(gridExtra)
+  #library(cowplot)
+ 
   
   
-
+  cdata <- session$clientData
   
   observeEvent(input$InputDate,{ 
 
@@ -35,14 +37,17 @@ function(input, output) {
     
   })
   
+  week_breaks <-  unique(epi_curve_overall_week$week_start_date)
+  
   output$epi_curve_total <- renderPlot({
     p = ggplot(epi_curve_overall_week, aes(week_start_date, cases)) +
           geom_bar(stat="identity", fill="darkblue") +
           labs(x="Week",y="Cases", title='Total new cases diagnosed per week') +
+          scale_x_date(breaks = week_breaks, date_labels = "%b-%d") +
+          theme_bw()+
           theme(axis.title.x=element_blank(),
                 axis.text.x=element_text(angle=90),
-                axis.ticks.x=element_blank()) +
-          theme_bw()
+                axis.ticks.x=element_blank()) 
     p
   })
   
@@ -113,7 +118,7 @@ function(input, output) {
   })
   
   output$active_cases_durham <- renderUI({box(
-    threshdf[1,2],
+    subset(threshdf, campus == "UNH DURHAM")$cases,
     width=3, 
     height=80,
     background=pick_color_threshold_numeric(threshdf[1,2], c(-1, 10, 50, 200)),
@@ -121,7 +126,7 @@ function(input, output) {
   )})
   
   output$active_cases_manch <- renderUI({box(
-    threshdf[3,2],
+    subset(threshdf, campus == "UNH MANCHESTER")$cases,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,2], c(-1, 10, 50, 200)),
@@ -129,7 +134,7 @@ function(input, output) {
   )})
   
   output$active_cases_concord <- renderUI({box(
-    threshdf[2,2],
+    subset(threshdf, campus == "UNH LAW")$cases,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,2], c(-1, 10, 50, 200)),
@@ -142,7 +147,7 @@ function(input, output) {
   })
   
   output$case_rates_durham <- renderUI({box(
-    glue("{round(threshdf[1,3],2)} per 1000"),
+    paste(subset(threshdf, campus == "UNH DURHAM")$cases," per 1000", sep=""),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[1,3], c(-1, 5, 100, 200)),
@@ -150,7 +155,7 @@ function(input, output) {
   )})
   
   output$case_rates_manch <- renderUI({box(
-    glue("{round(threshdf[3,3],2)} per 1000"),
+    paste(subset(threshdf, campus == "UNH MANCHESTER")$cases," per 1000", sep=""),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,3], c(-1, 5, 100, 200)),
@@ -158,7 +163,7 @@ function(input, output) {
   )})
   
   output$case_rates_concord <- renderUI({box(
-    glue("{round(threshdf[2,3],2)} per 1000"),
+    paste(subset(threshdf, campus == "LAW")$cases," per 1000", sep=""),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,3], c(-1, 5, 100, 200)),
@@ -171,7 +176,7 @@ function(input, output) {
   })
   
   output$pct_isol_durham <- renderUI({box(
-    glue("{threshdf[1,5]}"),
+    subset(threshdf, campus == "UNH DURHAM")$isolated,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[1,4], c(-1, 10, 50, 90)),
@@ -179,14 +184,14 @@ function(input, output) {
   )})
   
   output$pct_isol_manch <- renderUI({box(
-    glue("{threshdf[3,5]}"),
+    subset(threshdf, campus == "UNH MANCHESTER")$isolated,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,4], c(-1, 10, 50, 90))
   )})
   
   output$pct_isol_concord <- renderUI({box(
-    glue("{threshdf[2,5]}"),
+    subset(threshdf, campus == "UNH LAW")$isolated,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,4], c(-1, 10, 50, 90))
@@ -198,21 +203,21 @@ function(input, output) {
   })
   
   output$pct_quar_durham <- renderUI({box(
-    glue("{threshdf[1,4]}"),
+    subset(threshdf, campus == "UNH DURHAM")$quarantined,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[1,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_manch <- renderUI({box(
-    glue("{threshdf[3,4]}"),
+    subset(threshdf, campus == "UNH MANCHESTER")$quarantined,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[2,5], c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_concord <- renderUI({box(
-    glue("{threshdf[2,4]}"),
+    subset(threshdf, campus == "UNH LAW")$quarantined,
     width=3,
     height=80,
     background=pick_color_threshold_numeric(threshdf[3,5], c(-1, 25, 50, 90))
@@ -242,10 +247,11 @@ function(input, output) {
       geom_bar(stat="identity") +
       labs(x="Week",y="Cases", title='Total new cases diagnosed per week on/off campus')+
       scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
+      scale_x_date(breaks = week_breaks, date_labels = "%b-%d") +
+      theme_bw()+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_text(angle=90),
-            axis.ticks.x=element_blank()) +
-      theme_bw()
+            axis.ticks.x=element_blank()) 
     
   })
   
@@ -304,7 +310,7 @@ function(input, output) {
   
   # dorm table - only needed for UNH Durham currently
   # TO DO: figure out why subseting with campus_opt() did not work
-  Dorm_tab <- subset(dormdf,campus=="UNH Durham")
+  Dorm_tab <- subset(dormdf,campus=="UNH DURHAM")
   
   if(nrow(Dorm_tab)<1){
     # dummy data for when there are no dorms available
@@ -348,7 +354,7 @@ function(input, output) {
   output$mytable = renderDataTable({
     DT::datatable(
       Dorm_tab,
-      options = list(dom="t"),
+      options = list(dom="tp", pageLength=5),
       container = dorm_table
     )
   })
@@ -362,22 +368,162 @@ function(input, output) {
   tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
   
   ##Changing pct pos label to improve readability  
+<<<<<<< Updated upstream
   pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos ==0 , 0, ifelse(pct_pos_daily$pct_pos < 1,"<1",as.character(round(pct_pos_daily$pct_pos,1))))
+=======
+  pct_pos_daily$pct_pos_label2 <- paste(ifelse(pct_pos_daily$pct_pos_day ==0 , 0, ifelse(pct_pos_daily$pct_pos_day < 0.001,"<0.1",as.character(round(pct_pos_daily$pct_pos_day*100,1)))),"%",sep="")
   
-  output$testing_plot <- renderPlot({
+  
+  pct_pos_daily <- pct_pos_daily %>%
+  mutate("7 day % positive" = paste(round(pct_pos_wk,5)*100,"%",sep=""),"% Positive" = pct_pos_label2,"# Positive" = n_pos_day, "# Submitted" = n_tot_day)
+  
+  
+  ## merging campus table w pct_pos table to enable visualization in same plot
+  tecCampusfinal_w_pct <- merge(tecCampusfinal, pct_pos_daily, all.x=TRUE)
+  
+  
+  ay <- list(
+    titlefont=list(color="#de2d26", size = "12"),
+    tickfont = list(color = "#de2d26", size = "12"),
+    overlaying = "y",
+    side = "right",
+    title = "7 day % positive"
+  )
+  
     
-    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
-    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
-    gtest <- ggplot() +
-      geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result)), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
-      scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
-      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.3,0.5))) +
-      scale_y_continuous(name="") +
+
+    output$testing_plot <- renderPlotly({
+      
+      
+      ##getting range of y - axis for bar chart 
+      ylim.prim <- c(0,max(subset(tecCampusfinal,campus == campus_opt() & level=="Total" &!is.na(result))$tests))   # in this example, precipitation
+      ## y -axis rane for % pos trend line
+      ylim.sec <- c(0,0.05)   
+      
+      ## getting scaling factors
+      b <- diff(ylim.prim)/diff(ylim.sec)
+      a <- b*(ylim.prim[1] - ylim.sec[1])
+      
+      
+      #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
+      date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
+      
+      
+             ##subsetting table for required levels plus adding labels for plotly
+      gtest<-ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Total"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
+             ##%positive label for bar plot along with bars
+             geom_bar(aes(date, tests,fill=result, label=`% Positive`),stat="identity",width=0.4) +
+             ## 7 day % positive line w label
+             geom_line(aes(x=date,y = a + pct_pos_wk*b, label=`7 day % positive`), color = "#de2d26", size=1.2) +
+             #geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result) & level=="Total"), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
+             scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#636363"))+
+             scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d") +
+      scale_y_continuous(name="", sec.axis = sec_axis(~ (./b), name = "7 -day %positive")) +
       theme_minimal() +
       theme(axis.ticks.x=element_blank(),
             axis.text.x=element_text(angle=90),
-            legend.position = "top")
+            legend.position = "bottom")
 
+    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
+      #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
+      #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
+      #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
+      #geom_text(aes(x=date, y=5, label=n_tot_day)) +
+      #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
+      #theme_minimal() +
+      #theme(
+       # panel.grid.major = element_blank(), 
+      #  panel.grid.minor = element_blank(),
+       # panel.border = element_blank(),
+        #axis.line = element_blank(),
+        #axis.text.x = element_blank(),
+        #axis.text.y = element_text(size=10),
+        #axis.ticks = element_blank(),
+        #axis.title.x = element_blank(),
+        #axis.title.y = element_blank(),
+        #plot.title = element_blank()
+      #)
+  
+      ggplotly(gtest, 
+               width=cdata$output_testing_plot_width*0.99,
+               #selecting which numbers to display in pop -up
+               tooltip = c("label","label1","label2"))%>%
+        ##adding secondary y axis
+        add_lines(x=Sys.Date,y=c(0,5),colors = NULL, yaxis="y2", 
+                  showlegend=FALSE, inherit=FALSE) %>%
+        layout(yaxis2 = ay) %>%
+        layout(legend = list(
+          orientation = "h", x = 1.1, y = 1.3))
+      
+      
+   
+  })
+>>>>>>> Stashed changes
+  
+  output$testing_plot_student <- renderPlotly({
+    ylim.prim <- c(0,max(subset(tecCampusfinal,campus == campus_opt() & level=="Student" &!is.na(result))$tests))   # in this example, precipitation
+    ylim.sec <- c(0,0.05)    # in this example, temperature
+    
+    b <- diff(ylim.prim)/diff(ylim.sec)
+    a <- b*(ylim.prim[1] - ylim.sec[1])
+    
+    
+    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
+    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
+    
+    
+    ##subsetting table for required levels plus adding labels for plotly
+    gtest <- ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Student"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
+      ##%positive label for bar plot along with bars
+      geom_bar(aes(date, tests,fill=result, label=`% Positive`),stat="identity",width=0.4) +
+      ## 7 day % positive line w label
+      geom_line(aes(x=date,y = a + pct_pos_wk*b, label=`7 day % positive`), color = "#de2d26", size=1.2) +
+      #geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result) & level=="Total"), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
+      scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#636363"))+
+      scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d") +
+      scale_y_continuous(name="", sec.axis = sec_axis(~ (./b), name = "7 -day %positive")) +
+      theme_minimal() +
+      theme(axis.ticks.x=element_blank(),
+            axis.text.x=element_text(angle=90),
+            legend.position = "bottom")
+    
+    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
+    #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
+    #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
+    #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
+    #geom_text(aes(x=date, y=5, label=n_tot_day)) +
+    #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
+    #theme_minimal() +
+    #theme(
+    # panel.grid.major = element_blank(), 
+    #  panel.grid.minor = element_blank(),
+    # panel.border = element_blank(),
+    #axis.line = element_blank(),
+    #axis.text.x = element_blank(),
+    #axis.text.y = element_text(size=10),
+    #axis.ticks = element_blank(),
+    #axis.title.x = element_blank(),
+    #axis.title.y = element_blank(),
+    #plot.title = element_blank()
+    #)
+    
+    ##fixing the width of plotly figure in a flexible way
+    ggplotly(gtest, 
+             width=cdata$output_testing_plot_student_width*0.99,
+             #selecting which numbers to display in pop -up
+             tooltip = c("label","label1","label2"))%>%
+      ##adding secondary y axis
+            add_lines(x=Sys.Date,y=c(0,5),colors = NULL, yaxis="y2", 
+                      showlegend=FALSE, inherit=FALSE) %>%
+            layout(yaxis2 = ay) %>%
+            layout(legend = list(
+                  orientation = "h", x = 1.1, y = 1.3))
+    
+    
+    
+  })
+
+<<<<<<< Updated upstream
     glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
       geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
@@ -415,14 +561,69 @@ function(input, output) {
     #     axis.title.y = element_blank(),
     #     plot.title = element_blank()
     #   )
+=======
+  output$testing_plot_faculty <- renderPlotly({
+    ylim.prim <- c(0,max(subset(tecCampusfinal,campus == campus_opt() & level=="Faculty/Staff" &!is.na(result))$tests))   # in this example, precipitation
+    ylim.sec <- c(0,0.05)    # in this example, temperature
     
-    glabel <- ggplot_gtable(ggplot_build(glabel))
-    gtest <- ggplot_gtable(ggplot_build(gtest))
-    gtest$widths <-glabel$widths 
+    b <- diff(ylim.prim)/diff(ylim.sec)
+    a <- b*(ylim.prim[1] - ylim.sec[1])
     
-    grid.arrange(gtest, glabel,heights=c(10,3))
+    
+    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
+    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
+    
+    
+    ##subsetting table for required levels plus adding labels for plotly
+    gtest <- ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Faculty/Staff"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
+              ##%positive label for bar plot along with bars
+              geom_bar(aes(date, tests,fill=result, label=`% Positive`),stat="identity",width=0.4) +
+              ## 7 day % positive line w label
+              geom_line(aes(x=date,y = a + pct_pos_wk*b, label=`7 day % positive`), color = "#de2d26", size=1.2) +
+              #geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result) & level=="Total"), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
+              scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#636363"))+
+              scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d") +
+              scale_y_continuous(name="", sec.axis = sec_axis(~ (./b), name = "7 -day %positive")) +
+              theme_minimal() +
+              theme(axis.ticks.x=element_blank(),
+                    axis.text.x=element_text(angle=90),
+                    legend.position = "bottom")
+    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
+    #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
+    #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
+    #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
+    #geom_text(aes(x=date, y=5, label=n_tot_day)) +
+    #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
+    #theme_minimal() +
+    #theme(
+    # panel.grid.major = element_blank(), 
+    #  panel.grid.minor = element_blank(),
+    # panel.border = element_blank(),
+    #axis.line = element_blank(),
+    #axis.text.x = element_blank(),
+    #axis.text.y = element_text(size=10),
+    #axis.ticks = element_blank(),
+    #axis.title.x = element_blank(),
+    #axis.title.y = element_blank(),
+    #plot.title = element_blank()
+    #)
+>>>>>>> Stashed changes
+    
+    
+    ##fixing the width of plotly figure in a flexible way
+    ggplotly(gtest, 
+             width=cdata$output_testing_plot_faculty_width*0.99,
+             #selecting which numbers to display in pop -up
+             tooltip = c("label","label1","label2"))%>%
+      ##adding secondary y axis
+            add_lines(x=Sys.Date,y=c(0,5),colors = NULL, yaxis="y2", 
+                      showlegend=FALSE, inherit=FALSE) %>%
+            layout(yaxis2 = ay) %>%
+            layout(legend = list(
+                    orientation = "h", x = 1.1, y = 1.3))
     
   })
+  
   
   
   ## Lab delay labels
@@ -458,7 +659,44 @@ function(input, output) {
   #   height=80,
   #   solidHeader = TRUE
   # )})
-    
+
+  #table out to UI
+  week_lab_cont = htmltools::withTags(table(
+    style = "font-size: 95%; width: 85%; height:80%;  background-color:#FFFFFF;margin-top = -1em",
+    class = 'display',
+    thead(
+      tr(
+        th(colspan = 1, " "),
+        th(colspan = 1, "# tests"),
+        th(colspan = 1, "# people tested"),
+        th(colspan = 1, "# valid tests "),
+        th(colspan = 1, "tests per person")
+      )
+    )
+  ))
+  
+  
+  
+  
+  
+  #lab_weekly_table <- lab_weekly_table
+  
+  output$lab_table = renderDataTable({
+    DT::datatable(
+      subset(lab_weekly_table, campus == campus_opt())[ ,c("level","n_test","n_ppl_tested","n_valid_res","n_test_per_pers")],
+      options = list(dom="t"),
+      container = week_lab_cont,
+      rownames=FALSE)
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+      
 })
 }
 #)
