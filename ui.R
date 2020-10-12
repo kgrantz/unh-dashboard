@@ -196,21 +196,32 @@ dashboardPage(
                
         ),# END lefthand column
         
-        column(width=6, ## START righthand column
-               box(
-                 status="primary",
-                 width=NULL,
-                 solidHeader = TRUE,
-                 title = "Testing Statistics",
-                 plotOutput("testing_plot"), # TO DO: fix dimensions to server dimensions if needed
-                 br(),
+        column(width=6,
+               ## START righthand column
+               tabBox(title = h5("Testing Curve"),
+                      # The id lets us use input$tabset1 on the server to find the current tab
+                      id = "campus_epi_curve",
+                      width=NULL,
+                      height=400,
+                      tabPanel("Overall", plotlyOutput("testing_plot",height=350)),
+                      tabPanel("Student",plotlyOutput("testing_plot_student",height=350)),
+                      tabPanel("Faculty / Staff", plotlyOutput("testing_plot_faculty", height=350))
+               ), br(),
                  fluidRow(
-                   uiOutput("lab_delay_label"),
-                   uiOutput("lab_unh_label"), 
-                   uiOutput("lab_quest_label"),
-                   uiOutput("lab_cmd_label")
+                   #uiOutput("lab_delay_label"),
+                   #uiOutput("lab_unh_label"), 
+                   #uiOutput("lab_quest_label"),
+                   #uiOutput("lab_cmd_label")
+                   fluidRow(
+                     div(style = "font-size: 14px;", ##reducing font size.
+                         fluidRow(
+                           dataTableOutput("lab_table"),
+                           width=NULL,
+                           height=70)
+                     )
+                   ) # end fluidRow
                  )
-               ) # END box
+               #) # END box
         ) # END righthand column
         
       ) # END campus page
