@@ -223,7 +223,7 @@ function(input, output) {
   #dynamic sidebar menu conditional on selecting campus tab. Wrote a render function to reduce UI clutter.
   output$campus_dropdown <- renderMenu(selectInput("Campus", label="Select:", 
                                                    choices = c(unique(tecCampusfinal$campus)), 
-                                                   selected = "Durham")
+                                                   selected = "UNH DURHAM")
   )
   
   #getting campus value from UI
@@ -304,7 +304,7 @@ function(input, output) {
   
   # dorm table - only needed for UNH Durham currently
   # TO DO: figure out why subseting with campus_opt() did not work
-  Dorm_tab <- subset(dormdf,campus=="UNH Durham")
+  Dorm_tab <- subset(dormdf,campus=="UNH DURHAM")
   
   if(nrow(Dorm_tab)<1){
     # dummy data for when there are no dorms available
@@ -362,14 +362,14 @@ function(input, output) {
   tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
   
   ##Changing pct pos label to improve readability  
-  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos ==0 , 0, ifelse(pct_pos_daily$pct_pos < 0.01,"<1",as.character(round((pct_pos_daily$pct_pos)*100,0))))
+  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos_day ==0 , 0, ifelse(pct_pos_daily$pct_pos_day < 0.01,"<1",as.character(round((pct_pos_daily$pct_pos_day)*100,0))))
   
   output$testing_plot <- renderPlot({
     
     #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
     date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
     gtest <- ggplot() +
-      geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result)), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
+      geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result) & level=="Total"), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
       scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#912931"))+
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.3,0.5))) +
       scale_y_continuous(name="") +
@@ -378,11 +378,11 @@ function(input, output) {
             axis.text.x=element_text(angle=90),
             legend.position = "top")
 
-    glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
+    glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
       geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-      geom_text(aes(x=date, y=3.5, label=n_pos)) +
-      geom_text(aes(x=date, y=5, label=n_tot)) +
+      geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
+      geom_text(aes(x=date, y=5, label=n_tot_day)) +
       scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
       theme_minimal() +
       theme(
@@ -397,24 +397,6 @@ function(input, output) {
         axis.title.y = element_blank(),
         plot.title = element_blank()
       )
-    # glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
-    #   geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
-    #   geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
-    #   geom_text(aes(x=week_no, y=15, label=n_tot)) +
-    #   scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
-    #   theme_minimal() +
-    #   theme(
-    #     panel.grid.major = element_blank(), 
-    #     panel.grid.minor = element_blank(),
-    #     panel.border = element_blank(),
-    #     axis.line = element_blank(),
-    #     axis.text.x = element_blank(),
-    #     axis.text.y = element_text(size=11),
-    #     axis.ticks = element_blank(),
-    #     axis.title.x = element_blank(),
-    #     axis.title.y = element_blank(),
-    #     plot.title = element_blank()
-    #   )
     
     glabel <- ggplot_gtable(ggplot_build(glabel))
     gtest <- ggplot_gtable(ggplot_build(gtest))
