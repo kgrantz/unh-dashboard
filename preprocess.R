@@ -397,7 +397,7 @@ lab_weekly_table <- routinetesting_w_week %>%
 
   ## filter tec object to be just last 14 days
   tecCampusfinal <- tecCampusfinal %>%
-                    filter(date > (Sys.Date()-14)) %>%
+                    filter(date > (Sys.Date()-14))
     
 #### MISC. OBJECTS ------------------------------- ####
 
