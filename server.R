@@ -147,7 +147,7 @@ function(input, output, session) {
   })
   
   output$case_rates_durham <- renderUI({box(
-    paste(subset(threshdf, campus == "UNH DURHAM")$rate," per 1000", sep=""),
+    paste(round(subset(threshdf, campus == "UNH DURHAM")$rate,2)," per 1000", sep=""),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$rate, c(-1, 5, 100, 200)),
@@ -155,7 +155,7 @@ function(input, output, session) {
   )})
   
   output$case_rates_manch <- renderUI({box(
-    paste(subset(threshdf, campus == "UNH MANCHESTER")$rate," per 1000", sep=""),
+    paste(round(subset(threshdf, campus == "UNH MANCHESTER")$rate,2)," per 1000", sep=""),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$rate, c(-1, 5, 100, 200)),
@@ -163,7 +163,7 @@ function(input, output, session) {
   )})
   
   output$case_rates_concord <- renderUI({box(
-    paste(subset(threshdf, campus == "UNH LAW")$rate," per 1000", sep=""),
+    paste(round(subset(threshdf, campus == "UNH LAW")$rate,2)," per 1000", sep=""),
     width=3,
     height=80,
     background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$rate, c(-1, 5, 100, 200)),
