@@ -121,7 +121,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH DURHAM")$cases,
     width=3, 
     height=80,
-    background=pick_color_threshold_numeric(threshdf[1,2], c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 10, 50, 200)),
     solidHeader = TRUE
   )})
   
@@ -129,7 +129,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH MANCHESTER")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[2,2], c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 10, 50, 200)),
     solidHeader=TRUE
   )})
   
@@ -137,7 +137,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH LAW")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[3,2], c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 10, 50, 200)),
     solidHeader=TRUE
   )})
   
@@ -147,26 +147,26 @@ function(input, output, session) {
   })
   
   output$case_rates_durham <- renderUI({box(
-    paste(subset(threshdf, campus == "UNH DURHAM")$cases," per 1000", sep=""),
+    paste(subset(threshdf, campus == "UNH DURHAM")$rate," per 1000", sep=""),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[1,3], c(-1, 5, 100, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$rate, c(-1, 5, 100, 200)),
     solidHeader=TRUE
   )})
   
   output$case_rates_manch <- renderUI({box(
-    paste(subset(threshdf, campus == "UNH MANCHESTER")$cases," per 1000", sep=""),
+    paste(subset(threshdf, campus == "UNH MANCHESTER")$rate," per 1000", sep=""),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[2,3], c(-1, 5, 100, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$rate, c(-1, 5, 100, 200)),
     solidHeader=TRUE
   )})
   
   output$case_rates_concord <- renderUI({box(
-    paste(subset(threshdf, campus == "LAW")$cases," per 1000", sep=""),
+    paste(subset(threshdf, campus == "UNH LAW")$rate," per 1000", sep=""),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[3,3], c(-1, 5, 100, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$rate, c(-1, 5, 100, 200)),
     solidHeader=TRUE
   )})
   
@@ -179,7 +179,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH DURHAM")$isolated,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[1,4], c(-1, 10, 50, 90)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$isolated, c(-1, 10, 50, 90)),
     solidHeader=TRUE
   )})
   
@@ -187,14 +187,14 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH MANCHESTER")$isolated,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[2,4], c(-1, 10, 50, 90))
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$isolated, c(-1, 10, 50, 90))
   )})
   
   output$pct_isol_concord <- renderUI({box(
     subset(threshdf, campus == "UNH LAW")$isolated,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[3,4], c(-1, 10, 50, 90))
+    background=pick_color_threshold_numeric( subset(threshdf, campus == "UNH LAW")$isolated, c(-1, 10, 50, 90))
   )})
   
   ## pct quar
@@ -206,21 +206,21 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH DURHAM")$quarantined,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[1,5], c(-1, 25, 50, 90))
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$quarantined, c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_manch <- renderUI({box(
     subset(threshdf, campus == "UNH MANCHESTER")$quarantined,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[2,5], c(-1, 25, 50, 90))
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$quarantined, c(-1, 25, 50, 90))
   )})
   
   output$pct_quar_concord <- renderUI({box(
     subset(threshdf, campus == "UNH LAW")$quarantined,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(threshdf[3,5], c(-1, 25, 50, 90))
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$quarantined, c(-1, 25, 50, 90))
   )})
   
   ## UNH Campus Situation -------------------------------------------------------
