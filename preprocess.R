@@ -331,6 +331,7 @@ tecCampusfinal <- tecCampus1 %>%
 <<<<<<< HEAD
 =======
 <<<<<<< Updated upstream
+  #add zeroes to days missing for each category
   full_join(expand_grid(campus=unique(tecCampus1$campus),
                         date=seq.Date(min(tecCampus1$date), 
                                       Sys.Date(),

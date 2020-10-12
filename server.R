@@ -1,5 +1,6 @@
 #shinyServer(
 
+function(input, output, session) {
   library(tidyverse)
   library(DT)
   library(htmltools)
