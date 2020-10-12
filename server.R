@@ -304,7 +304,7 @@ function(input, output) {
   
   # dorm table - only needed for UNH Durham currently
   # TO DO: figure out why subseting with campus_opt() did not work
-  Dorm_tab <- subset(dormdf,campus=="UNH Durham")
+  Dorm_tab <- subset(dormdf,campus=="UNH DURHAM")
   
   if(nrow(Dorm_tab)<1){
     # dummy data for when there are no dorms available
@@ -362,7 +362,7 @@ function(input, output) {
   tecCampusfinal$result <- factor(tecCampusfinal$result, levels=c("Positive", "Negative", "Invalid / Rejected / Not Performed"))
   
   ##Changing pct pos label to improve readability  
-  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos ==0 , 0, ifelse(pct_pos_daily$pct_pos < 0.01,"<1",as.character(round((pct_pos_daily$pct_pos)*100,0))))
+  pct_pos_daily$pct_pos_label2 <- ifelse(pct_pos_daily$pct_pos_day ==0 , 0, ifelse(pct_pos_daily$pct_pos_day < 0.01,"<1",as.character(round((pct_pos_daily$pct_pos_day)*100,0))))
   
   output$testing_plot <- renderPlot({
     
@@ -378,7 +378,7 @@ function(input, output) {
             axis.text.x=element_text(angle=90),
             legend.position = "top")
 
-    glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt())) +
+    glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
       scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
       geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
       geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
