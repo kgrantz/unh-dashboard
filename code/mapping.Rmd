@@ -20,20 +20,30 @@ library(ggrepel)
 ### bring in the shape files
 ```{r}
 
-box = c(xmin = -71.2, xmax = -70.8,ymin=43,ymax=43.5)
-
-
-BaseMap <- read_sf("shapefiles/UNH_Basemap.shp")
-Buildings <- read_sf("shapefiles/UNH_Buildings.shp")
-
-
-sidewalks <- filter(BaseMap,LAND_USE=="Sidewalk")
+box = c(xmin = 1177000 , xmax = 1183000 ,ymin=229500,ymax=237000 )
 
 
 
-dormlist <- c("CHRISTENSEN HALL",
-              "EATON HOUSE",
-              "ENGELHARDT HALL")
+
+
+
+
+BaseMap <- read_sf("shapefiles/UNH_Basemap.shp") 
+Buildings <- read_sf("shapefiles/UNH_Buildings.shp")%>%
+                st_crop(box)
+
+sidewalks <- filter(BaseMap,LAND_USE=="Sidewalk")%>%
+                st_make_valid()%>%
+                st_crop(box)
+greenspace <- filter(BaseMap,LAND_USE=="Green Space")%>%
+                st_make_valid()%>%
+                st_crop(box)
+
+
+
+# dormlist <- c("CHRISTENSEN HALL",
+#               "EATON HOUSE",
+#               "ENGELHARDT HALL")
 
 
 
@@ -47,18 +57,46 @@ tests <- read_csv("data/raw_data/routinetesting.csv") %>%
                 left_join(read_csv("data/raw_data/individualdemographics.csv"))
 
 cases <- tests %>% filter(result=="Positive") %>%
-                group_by(dorm) %>%
-                summarise(cases=n()) %>%
-                mutate(BUILDING_N=toupper(dorm))
+                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                group_by(BUILDING_N) %>%
+                summarise(cases=n())
+
+Allcases <- tests %>% filter(result=="Positive") %>%
+                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                group_by(BUILDING_N) %>%
+                summarise(cases=n()) 
+
+cases10 <- tests %>% filter(result=="Positive") %>%
+                filter(resultsdate>=(Sys.Date()-10))%>%
+                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                group_by(BUILDING_N) %>%
+                summarise(cases=n())
+
 
 
 dormlist <- tests %>% filter(!is.na(dorm)) %>%
                 distinct(dorm) %>%
-                mutate(upper=toupper(dorm))
+                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                select(-FACILITIES)
 
-dorms <- filter(Buildings,BUILDING_N %in% dormlist$upper) %>%
+
+# write_csv(data.frame(name=Buildings$BUILDING_N,
+#                      fac=Buildings$FACILITIES
+#                      ) %>% arrange(name),"data/tidy_data/buildings.csv")
+# 
+# dormlist %>% left_join(data.frame(
+#                 facility= Buildings$FACILITIES,
+#                 upper=Buildings$BUILDING_N)) %>%
+#                 arrange(upper) %>%
+#                 write_csv("data/tidy_data/dormlist.csv")
+
+
+nondorms <- filter(Buildings,!(BUILDING_N %in% dormlist$BUILDING_N) ) 
+
+
+dorms <- filter(Buildings,BUILDING_N %in% dormlist$BUILDING_N) %>%
                 left_join(cases) %>%
-                mutate(Name=ifelse(cases>=2,BUILDING_N,NA))%>%
+                mutate(Name=ifelse(cases>=0,BUILDING_N,NA))%>%
                 mutate(centroid=st_centroid(geometry))%>%
                 mutate(centerx=NA,centery=NA)
 
@@ -68,6 +106,27 @@ for (i in seq_len(nrow(dorms))){
                 dorms$centery[i] <- dorms$centroid[[i]][[2]]
                 
 }
+
+
+
+dorms2 <- filter(Buildings,BUILDING_N %in% dormlist$BUILDING_N) %>%
+                mutate(centroid=st_centroid(geometry))%>%
+                mutate(centerx=NA,centery=NA)
+
+for (i in seq_len(nrow(dorms2))){
+                
+                dorms2$centerx[i] <- dorms2$centroid[[i]][[1]]
+                dorms2$centery[i] <- dorms2$centroid[[i]][[2]]
+                
+}
+
+
+dorms3 <- bind_rows(left_join(dorms2,Allcases)%>%
+                mutate(map="All Cases"),
+                    left_join(dorms2,cases10)%>%
+                mutate(map="Active Cases"),
+                    
+                    )
 
 
 
@@ -82,24 +141,54 @@ for (i in seq_len(nrow(dorms))){
 
 # BMgraph <- ggplot(BaseMap) +
 #   geom_sf()
+# 
+# Bgraph <- ggplot(Buildings) +
+#   geom_sf()
 
-Bgraph <- ggplot(Buildings) +
-  geom_sf()
+dormlabels <-  data.frame(
+                names=c("The Gables", "Woodside","The Hills",
+                  "The Valley", "The Timbers"),
+                
+                x=c(0.55,0.65,0.8,0.85,0.35)*(box[2]-box[1])+box[1],
+                y=c(0.8,0.7,0.55,0.25,0.35)*(box[4]-box[3])+box[3]
+                )
 
 
-Dgraph<-ggplot(dorms) +
-                geom_sf(col="lightblue",fill="lightblue")+
-                geom_sf(data=sidewalks)+
+
+Dgraph<- ggplot(dorms) +
+                geom_sf(col="black",fill=NA,size=2)+
+                # geom_sf(data=sidewalks)+
+                # geom_sf(data=nondorms,col=NA,fill="lightgrey")+
+                geom_sf(data=greenspace,fill="lightgreen",col=NA)+
+                
                 geom_point(aes(size=cases,x=centerx,y=centery),
-                               color="red",alpha=0.5)+
-                geom_text_repel(aes(label=Name,x=centerx,y=centery))+
+                               color="purple",alpha=0.5)+
+                geom_text(data=dormlabels,aes(x=x,y=y,label=names))+
+                # geom_text_repel(aes(label=Name,x=centerx,y=centery))+
                 scale_size(limits=c(1,20),breaks=c(5,10,15,20))+
                 theme_void()
+
+ggsave("figures/dorms.pdf",Dgraph,device = "pdf")
+
+Dgraph2 <- ggplot(dorms3) +
+                geom_sf(col="black",fill=NA,size=2)+
+                # geom_sf(data=sidewalks)+
+                # geom_sf(data=nondorms,col=NA,fill="lightgrey")+
+                geom_sf(data=greenspace,fill="lightgreen",col=NA)+
+                
+                geom_point(aes(size=cases,x=centerx,y=centery),
+                               color="purple")+
+                geom_text(data=dormlabels,aes(x=x,y=y,label=names))+
+                # geom_text_repel(aes(label=Name,x=centerx,y=centery))+
+                scale_size(limits=c(1,20),breaks=c(5,10,15,20))+
+                theme_void()+
+                facet_wrap(.~map)
+
+ggsave("figures/dorms2.pdf",Dgraph2,device = "pdf")
 
 
 # ggsave(BMgraph,"figures/basemap.pdf")
 # ggsave("figures/buildings.pdf",Bgraph,device = "pdf")
-ggsave("figures/dorms.pdf",Dgraph,device = "pdf")
 
 
 ```
