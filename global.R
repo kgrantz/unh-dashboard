@@ -8,6 +8,7 @@ library(viridisLite)
 library(tippy)
 library(readr)
 library(DT)
+library(plotly)
 
 
 ## Helper functions ----
@@ -54,4 +55,9 @@ all_dates <- seq(from=as.Date("2020-09-23"),Sys.Date(),"days")
 
 # remove dates for which pre - processing script doesn't run
 remove_dates <- as.Date(all_dates[is.na(match(all_dates,data_dates))])
+
+int_breaks <- function(x, n = 5) {
+  l <- pretty(x, n)
+  l[abs(l %% 1) < .Machine$double.eps ^ 0.5] 
+}
   
