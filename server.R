@@ -263,13 +263,13 @@ function(input, output, session) {
       geom_bar(stat="identity") +
       labs(x="Week",y="Cases", title='Total new cases diagnosed per week among students and faculty')+
       scale_fill_manual(name="", values=c('darkblue','cornflowerblue'))+
+      scale_x_date(breaks = week_breaks, date_labels = "%b-%d") +
+      theme_bw()+
       theme(axis.title.x=element_blank(),
             axis.text.x=element_text(angle=90),
-            axis.ticks.x=element_blank()) +
-      theme_bw()
+            axis.ticks.x=element_blank()) 
     
   })
-  
   
   #made formatted boxes for the 3 box tabs in campus tab. Please feel free to change color, size etc. according to
   #other preferences
