@@ -8,6 +8,7 @@ library(viridisLite)
 library(tippy)
 library(readr)
 library(DT)
+library(plotly)
 
 
 ## Helper functions ----
