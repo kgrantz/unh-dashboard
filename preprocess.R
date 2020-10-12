@@ -328,31 +328,13 @@ tecCampus_levels <- routinetesting_w_week %>%
   rename(level = user_status_comb)
 
 tecCampusfinal <- tecCampus1 %>%
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-  #add zeroes to days missing for each category
-  full_join(expand_grid(campus=unique(tecCampus1$campus),
-                        date=seq.Date(min(tecCampus1$date), 
-                                      Sys.Date(),
-                                      by="days"),
-                        result=unique(tecCampus1$result))) %>%
-  mutate(tests=ifelse(is.na(tests),0,tests))
-=======
->>>>>>> prod_1005
   mutate(level = "Total") %>%
   bind_rows(tecCampus_levels) %>%
   ungroup() %>%
   tidyr::complete(campus, date, level, result) %>%
   mutate(tests=ifelse(is.na(tests),0,tests)) 
-<<<<<<< HEAD
-  # NOTE: this is filtered below to only include last 14 days for plot
-  # but contains date on last 21 here in order to calculate 7-day average % pos
-=======
 # NOTE: this is filtered below to only include last 14 days for plot
 # but contains date on last 21 here in order to calculate 7-day average % pos
->>>>>>> Stashed changes
->>>>>>> prod_1005
 
 ### Testing table ------------------------------- 
 # data frame -- DAY LEVEL for display under graph, WEEK LEVEL for 2-week table
@@ -363,88 +345,12 @@ tecCampusfinal <- tecCampus1 %>%
 # n_not_submitted = (all tests that should have been collected - all tests that were collected) 
 # % positive tests = # all positive tests / (# all positive tests + # all negative tests)
 # to figure out what they're doing about pooled samples - does the updated result of a pooled sample go in as a new row (so rows are tests) or are rows just samples
-<<<<<<< HEAD
-=======
-pct_pos <- tecCampusfinal %>%
-  group_by(week_no, campus) %>%
-  summarise(n_pos = sum(tests[which(result=="Positive")]),
-            n_neg = sum(tests[which(result=="Negative")]),
-            n_tot = sum(tests),
-            pct_pos = n_pos/ ifelse((n_pos + n_neg)==0,1,(n_pos+n_neg)),
-            pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
-
-pct_pos_daily <- tecCampusfinal %>%
-<<<<<<< Updated upstream
-  group_by(date, campus) %>%
-  summarise(n_pos = sum(tests[which(result=="Positive")]),
-            n_neg = sum(tests[which(result=="Negative")]),
-            n_tot = sum(tests),
-            pct_pos = n_pos/ ifelse((n_pos + n_neg)==0,1,(n_pos+n_neg)),
-            pct_pos_label = paste0(ceiling(pct_pos*100),"%"))
-
-### Testing delays ------------------------------- 
-# we can't really do this yet
-# eventually, data frame of 
-# campus
-# lab
-# median days from sample collection to test results returned in last 2 weeks
->>>>>>> prod_1005
 
 # take rolling 7 day windows
 rollsum <- tibbletime::rollify(sum, window = 7)
 
 # Daily table for graph, with running 7-day % pos average
 pct_pos_daily <- tecCampusfinal %>%
-  group_by(campus, level, result) %>%
-  arrange(date) %>%
-  mutate(sum7 = rollsum(tests)) %>%
-  ungroup() %>%
-  filter(date > (Sys.Date()-14)) %>%
-  group_by(date, campus, level) %>%
-  summarise(n_pos_day = sum(tests[which(result=="Positive")]),
-            n_neg_day = sum(tests[which(result=="Negative")]),
-            n_tot_day = sum(tests),
-            pct_pos_day = n_pos_day/ ifelse((n_pos_day + n_neg_day)==0,1,(n_pos_day+n_neg_day)),
-            pct_pos_day_label = paste0(ceiling(pct_pos_day*100),"%"),
-            n_pos_wk = sum(sum7[which(result=="Positive")]),
-            n_neg_wk = sum(sum7[which(result=="Negative")]),
-            pct_pos_wk = n_pos_wk/ ifelse((n_pos_wk + n_neg_wk)==0,1,(n_pos_wk+n_neg_wk)),
-            pct_pos_wk_label = paste0(ceiling(pct_pos_wk*100),"%"))
-
-# Week table for overall display 
-# show # tests submitted, # people submitted, # tests per person, # (%) tests with valid results to dashboard
-lab_weekly_table_levels <- routinetesting_w_week %>% 
-                           left_join(individualdemographics) %>%
-                           filter(!is.na(result)) %>%
-                           filter(!is.na(campus)) %>%
-                           filter(date > (Sys.Date()-14)) %>%
-                           filter(date <= Sys.Date()) %>%
-                           group_by(campus, user_status) %>%
-                           summarize(n_test=n(),
-                                     n_ppl_tested=n_distinct(uid),
-                                     n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
-                           rename(level = user_status)
-
-lab_weekly_table <- routinetesting_w_week %>% 
-                     left_join(individualdemographics) %>%
-                     filter(!is.na(result)) %>%
-                     filter(!is.na(campus)) %>%
-                     filter(date > (Sys.Date()-14)) %>%
-                     filter(date <= Sys.Date()) %>%
-                     group_by(campus) %>%
-                     summarize(n_test=n(),
-                               n_ppl_tested=n_distinct(uid),
-                               n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
-                     mutate(level = "Total") %>%
-                     bind_rows(lab_weekly_table_levels) %>%
-                     mutate(n_test_per_pers = n_test/n_ppl_tested)
-
-  ## filter tec object to be just last 14 days
-  tecCampusfinal <- tecCampusfinal %>%
-                    filter(date > (Sys.Date()-14))
-    
-#### MISC. OBJECTS ------------------------------- ####
-=======
   group_by(campus, level, result) %>%
   arrange(date) %>%
   mutate(sum7 = rollsum(tests)) %>%
@@ -492,9 +398,8 @@ lab_weekly_table <- routinetesting_w_week %>%
 ## filter tec object to be just last 14 days
 tecCampusfinal <- tecCampusfinal %>%
   filter(date > (Sys.Date()-14))
-  
-  #### MISC. OBJECTS ------------------------------- ####
->>>>>>> Stashed changes
+
+#### MISC. OBJECTS ------------------------------- ####
 
 # leave notes here if you think of other things that would be helpful!
 
@@ -518,18 +423,6 @@ save(file=filename,
               "threshdf",
               "dormdf",
               "tecCampusfinal",
-<<<<<<< HEAD
               "pct_pos_daily",
               "lab_weekly_table"
      ))
-=======
-<<<<<<< Updated upstream
-              "pct_pos",
-              "pct_pos_daily"
-     ))
-=======
-              "pct_pos_daily",
-              "lab_weekly_table"
-     ))
->>>>>>> Stashed changes
->>>>>>> prod_1005
