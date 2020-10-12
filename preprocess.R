@@ -393,7 +393,7 @@ lab_weekly_table <- routinetesting_w_week %>%
                                n_valid_res=sum(result=="Positive" | result=="Negative")) %>%
                      mutate(level = "Total") %>%
                      bind_rows(lab_weekly_table_levels) %>%
-                     mutate(n_test_per_pers = n_test/n_ppl_tested)
+                     mutate(n_test_per_pers = round(n_test/n_ppl_tested,2))
 
   ## filter tec object to be just last 14 days
   tecCampusfinal <- tecCampusfinal %>%
