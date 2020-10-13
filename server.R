@@ -324,8 +324,8 @@ function(input, output, session) {
   }else{
     Dorm_tab <- Dorm_tab %>%
                 ungroup() %>%
-                select(dorm, cases, rate, quarantined) %>%
-                mutate(rate = round(rate, 2)) %>%
+                select(dorm, cases, quarantined) %>%
+                #mutate(rate = round(rate, 2)) %>%
                 arrange(desc(cases))
     
     Dorm_tab <- as.matrix(Dorm_tab)
@@ -339,12 +339,12 @@ function(input, output, session) {
       tr(
         th(rowspan = 2, "Dorm"),
         th(colspan = 1, "Active Cases"),
-        th(colspan = 1, "Active Cases"),
+        #th(colspan = 1, "Active Cases"),
         th(colspan = 1, "# Quarantined")
       ),
       tr(
         th("(10-day total)"),
-        th("per 1000 population"),
+        #th("per 1000 population"),
         th("from dorm")
       )
       
