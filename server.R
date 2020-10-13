@@ -96,16 +96,12 @@ function(input, output, session) {
     height=40,
     solidHeader=TRUE
   )})
-  
+ 
+   url <- a("Statewide restrictions", href="https://www.covidguidance.nh.gov/")
   output$current_restrictions <- renderUI({box(
-    state_curr_cond,
+    tagList("URL link:", url),
     width=4,
-    background=ifelse(state_curr_cond=="None",
-                      "green",
-                      ifelse(state_curr_cond == "Open",
-                             "yellow",
-                             ifelse(state_curr_cond=="Limited Open", "orange", "red"))),
-    href="https://www.covidguidance.nh.gov/"
+    background="black"
   )})
   
   output$state_date_updated <- renderText({statedatetimeupdated})
