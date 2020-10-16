@@ -320,9 +320,7 @@ function(input, output, session) {
   }else{
     Dorm_tab <- Dorm_tab %>%
                 ungroup() %>%
-                select(dorm, cases, quarantined) %>%
-                #mutate(rate = round(rate, 2)) %>%
-                arrange(desc(cases))
+                select(dorm, cases, quarantined)
     
     Dorm_tab <- as.matrix(Dorm_tab)
   }
@@ -751,34 +749,23 @@ function(input, output, session) {
     thead(
       tr(
         th(colspan = 1, " "),
-        th(colspan = 1, "# tests"),
-        th(colspan = 1, "# people tested"),
-        th(colspan = 1, "# valid tests "),
-        th(colspan = 1, "tests per person")
+        th(colspan = 1, "Tests submitted"),
+        th(colspan = 1, "Unique IDs\nsubmitting test"),
+        th(colspan = 1, "Tests submitted\nper unique ID "),
+        th(colspan = 1, "Valid Results")
       )
     )
   ))
-  
-  
-  
-  
-  
-  #lab_weekly_table <- lab_weekly_table
+
+  lab_weekly_table <- lab_weekly_table %>% arrange(desc(n_test))
   
   output$lab_table = renderDataTable({
     DT::datatable(
-      subset(lab_weekly_table, campus == campus_opt())[ ,c("level","n_test","n_ppl_tested","n_valid_res","n_test_per_pers")],
-      options = list(dom="t"),
+      subset(lab_weekly_table, campus == campus_opt())[ ,c("level","n_test","n_ppl_tested","n_test_per_pers", "n_valid_res")],
+      options = list(dom="t", ordering=F),
       container = week_lab_cont,
       rownames=FALSE)
   })
-  
-  
-  
-  
-  
-  
-  
   
       
 })

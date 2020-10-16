@@ -212,7 +212,11 @@ dashboardPage(
                    #uiOutput("lab_unh_label"), 
                    #uiOutput("lab_quest_label"),
                    #uiOutput("lab_cmd_label")
-                   fluidRow(
+                   box(
+                     status="primary",
+                     title = "14-Day Testing Statistics",
+                     solidHeader = TRUE,
+                     width = 12,
                      div(style = "font-size: 14px;", ##reducing font size.
                          fluidRow(
                            dataTableOutput("lab_table"),
