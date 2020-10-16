@@ -291,7 +291,10 @@ dormdf <- cases10 %>% group_by(campus, dorm) %>%
   mutate(rate=cases/pop*1000) %>%
   arrange(-rate) %>%
   left_join(quardorm) %>%
-  mutate(quarantined=ifelse(is.na(quarantined),0,quarantined))
+  mutate(quarantined=ifelse(is.na(quarantined),0,quarantined)) %>%
+  mutate(quarantined=ifelse(quarantined>0 & quarantined<5, "<5", quarantined)) %>%
+  mutate(cases=ifelse(cases>0 & cases<5, "<5", cases)) %>%
+  arrange(cases, quarantined)
 
 
 
