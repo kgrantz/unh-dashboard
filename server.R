@@ -381,11 +381,11 @@ function(input, output, session) {
     title = "7 day % positive"
   )
 
+  date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
   
     
 
     output$testing_plot <- renderPlotly({
-      
       
       ##getting range of y - axis for bar chart 
       ylim.prim <- c(0,max(subset(tecCampusfinal,campus == campus_opt() & level=="Total" &!is.na(result))$tests))   # in this example, precipitation
@@ -395,11 +395,6 @@ function(input, output, session) {
       ## getting scaling factors
       b <- diff(ylim.prim)/diff(ylim.sec)
       a <- b*(ylim.prim[1] - ylim.sec[1])
-      
-      
-      #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
-      date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
-      
       
              ##subsetting table for required levels plus adding labels for plotly
       gtest<-ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Total"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
@@ -415,26 +410,6 @@ function(input, output, session) {
       theme(axis.ticks.x=element_blank(),
             axis.text.x=element_text(angle=90),
             legend.position = "bottom")
-
-    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
-      #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
-      #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-      #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
-      #geom_text(aes(x=date, y=5, label=n_tot_day)) +
-      #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
-      #theme_minimal() +
-      #theme(
-       # panel.grid.major = element_blank(), 
-      #  panel.grid.minor = element_blank(),
-       # panel.border = element_blank(),
-        #axis.line = element_blank(),
-        #axis.text.x = element_blank(),
-        #axis.text.y = element_text(size=10),
-        #axis.ticks = element_blank(),
-        #axis.title.x = element_blank(),
-        #axis.title.y = element_blank(),
-        #plot.title = element_blank()
-      #)
   
       ggplotly(gtest, 
                width=cdata$output_testing_plot_width*0.99,
@@ -447,79 +422,8 @@ function(input, output, session) {
         layout(legend = list(
           orientation = "h", x = 1.1, y = 1.3))
       
-      
-   
   })
 
-    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
-  
-
-    output$testing_plot <- renderPlotly({
-      
-      
-      ##getting range of y - axis for bar chart 
-      ylim.prim <- c(0,max(subset(tecCampusfinal,campus == campus_opt() & level=="Total" &!is.na(result))$tests))   # in this example, precipitation
-      ## y -axis rane for % pos trend line
-      ylim.sec <- c(0,0.05)   
-      
-      ## getting scaling factors
-      b <- diff(ylim.prim)/diff(ylim.sec)
-      a <- b*(ylim.prim[1] - ylim.sec[1])
-      
-      
-      #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
-      
-      
-             ##subsetting table for required levels plus adding labels for plotly
-      gtest<-ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Total"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
-             ##%positive label for bar plot along with bars
-             geom_bar(aes(date, tests,fill=result, label=`% Positive`),stat="identity",width=0.4) +
-             ## 7 day % positive line w label
-             geom_line(aes(x=date,y = a + pct_pos_wk*b, label=`7 day % positive`), color = "#de2d26", size=1.2) +
-             #geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result) & level=="Total"), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
-             scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#636363"))+
-             scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d") +
-        scale_y_continuous(name="",breaks = int_breaks, sec.axis = sec_axis(~ (./b), name = "7 -day %positive")) +
-        theme_minimal() +
-        theme(axis.ticks.x=element_blank(),
-              axis.text.x=element_text(angle=90),
-              legend.position = "bottom")
-    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
-      #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
-      #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-      #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
-      #geom_text(aes(x=date, y=5, label=n_tot_day)) +
-      #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
-      #theme_minimal() +
-      #theme(
-       # panel.grid.major = element_blank(), 
-      #  panel.grid.minor = element_blank(),
-       # panel.border = element_blank(),
-        #axis.line = element_blank(),
-        #axis.text.x = element_blank(),
-        #axis.text.y = element_text(size=10),
-        #axis.ticks = element_blank(),
-        #axis.title.x = element_blank(),
-        #axis.title.y = element_blank(),
-        #plot.title = element_blank()
-      #)
-  
-      ggplotly(gtest, 
-               width=cdata$output_testing_plot_width*0.99,
-               #selecting which numbers to display in pop -up
-               tooltip = c("label","label1","label2"))%>%
-        ##adding secondary y axis
-        add_lines(x=Sys.Date,y=c(0,5),colors = NULL, yaxis="y2", 
-                  showlegend=FALSE, inherit=FALSE) %>%
-        layout(yaxis2 = ay) %>%
-        layout(legend = list(
-          orientation = "h", x = 1.1, y = 1.3))
-      
-      
-   
-  })
-
-  
 
   output$testing_plot_student <- renderPlotly({
     ylim.prim <- c(0,max(subset(tecCampusfinal,campus == campus_opt() & level=="Student" &!is.na(result))$tests))   # in this example, precipitation
@@ -528,8 +432,6 @@ function(input, output, session) {
     b <- diff(ylim.prim)/diff(ylim.sec)
     a <- b*(ylim.prim[1] - ylim.sec[1])
     
-    
-    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
     ##subsetting table for required levels plus adding labels for plotly
     gtest <- ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Student"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
       ##%positive label for bar plot along with bars
@@ -547,26 +449,6 @@ function(input, output, session) {
             axis.text.x=element_text(angle=90),
             legend.position = "bottom")
     
-    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
-    #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
-    #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-    #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
-    #geom_text(aes(x=date, y=5, label=n_tot_day)) +
-    #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
-    #theme_minimal() +
-    #theme(
-    # panel.grid.major = element_blank(), 
-    #  panel.grid.minor = element_blank(),
-    # panel.border = element_blank(),
-    #axis.line = element_blank(),
-    #axis.text.x = element_blank(),
-    #axis.text.y = element_text(size=10),
-    #axis.ticks = element_blank(),
-    #axis.title.x = element_blank(),
-    #axis.title.y = element_blank(),
-    #plot.title = element_blank()
-    #)
-    
     ##fixing the width of plotly figure in a flexible way
     ggplotly(gtest, 
              width=cdata$output_testing_plot_student_width*0.99,
@@ -578,33 +460,9 @@ function(input, output, session) {
             layout(yaxis2 = ay) %>%
             layout(legend = list(
                   orientation = "h", x = 1.1, y = 1.3))
-    
-    
+
     
   })
-
-
-
-    # glabel <- ggplot(data=subset(pct_pos,campus==campus_opt())) +
-    #   geom_text(aes(x=week_no, y=5, label=pct_pos_label)) +
-    #   geom_text(aes(x=week_no, y=10, label=n_not_subm)) +
-    #   geom_text(aes(x=week_no, y=15, label=n_tot)) +
-    #   scale_y_continuous(name="", breaks=c(5, 10, 15), labels=c("% Positive", "# Not Submitted", "# Submitted")) +
-    #   theme_minimal() +
-    #   theme(
-    #     panel.grid.major = element_blank(), 
-    #     panel.grid.minor = element_blank(),
-    #     panel.border = element_blank(),
-    #     axis.line = element_blank(),
-    #     axis.text.x = element_blank(),
-    #     axis.text.y = element_text(size=11),
-    #     axis.ticks = element_blank(),
-    #     axis.title.x = element_blank(),
-    #     axis.title.y = element_blank(),
-    #     plot.title = element_blank()
-    #   )
-
-
 
 
   output$testing_plot_faculty <- renderPlotly({
@@ -613,12 +471,6 @@ function(input, output, session) {
     
     b <- diff(ylim.prim)/diff(ylim.sec)
     a <- b*(ylim.prim[1] - ylim.sec[1])
-    
-    
-    #date_limits <- c(min(tecCampusfinal$date)-1, max(tecCampusfinal$date))
-
-    date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)
-    
 
     
     ##subsetting table for required levels plus adding labels for plotly
@@ -635,62 +487,7 @@ function(input, output, session) {
               theme(axis.ticks.x=element_blank(),
                     axis.text.x=element_text(angle=90),
                     legend.position = "bottom")
-    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
-    #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
-    #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-    #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
-    #geom_text(aes(x=date, y=5, label=n_tot_day)) +
-    #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
-    #theme_minimal() +
-    #theme(
-    # panel.grid.major = element_blank(), 
-    #  panel.grid.minor = element_blank(),
-    # panel.border = element_blank(),
-    #axis.line = element_blank(),
-    #axis.text.x = element_blank(),
-    #axis.text.y = element_text(size=10),
-    #axis.ticks = element_blank(),
-    #axis.title.x = element_blank(),
-    #axis.title.y = element_blank(),
-    #plot.title = element_blank()
-    #)
 
-    ##subsetting table for required levels plus adding labels for plotly
-    gtest <- ggplot(subset(tecCampusfinal_w_pct,campus==campus_opt() & !is.na(result) & level=="Faculty/Staff"), aes(label1=`# Positive`,label2 = `# Submitted`)) +
-              ##%positive label for bar plot along with bars
-              geom_bar(aes(date, tests,fill=result, label=`% Positive`),stat="identity",width=0.4) +
-              ## 7 day % positive line w label
-              geom_line(aes(x=date,y = a + pct_pos_wk*b, label=`7 day % positive`), color = "#de2d26", size=1.2) +
-              #geom_bar(data=subset(tecCampusfinal,campus==campus_opt() & !is.na(result) & level=="Total"), aes(x=date, y=tests, fill=result), stat="identity",width=0.4) +
-              scale_fill_manual(name="", values=c("#bbc1c9","#5c7596","#636363"))+
-              scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d") +
-              scale_y_continuous(name="",breaks = int_breaks, sec.axis = sec_axis(~ (./b), name = "7 -day %positive")) +
-              theme_minimal() +
-              theme(axis.ticks.x=element_blank(),
-                    axis.text.x=element_text(angle=90),
-                    legend.position = "bottom")
-    #glabel <- ggplot(data=subset(pct_pos_daily,campus==campus_opt() & level=="Total")) +
-    #scale_x_date(name="", breaks = date_breaks, date_labels = "%b-%d",expand=expansion(add=c(0.6,0.5))) +
-    #geom_text(aes(x=date, y=2, label=pct_pos_label2)) +
-    #geom_text(aes(x=date, y=3.5, label=n_pos_day)) +
-    #geom_text(aes(x=date, y=5, label=n_tot_day)) +
-    #scale_y_continuous(name="", breaks=c(2, 3.5, 5), labels=c("% Positive", "# Positive", "# Submitted"), limits = c(0, 5)) +
-    #theme_minimal() +
-    #theme(
-    # panel.grid.major = element_blank(), 
-    #  panel.grid.minor = element_blank(),
-    # panel.border = element_blank(),
-    #axis.line = element_blank(),
-    #axis.text.x = element_blank(),
-    #axis.text.y = element_text(size=10),
-    #axis.ticks = element_blank(),
-    #axis.title.x = element_blank(),
-    #axis.title.y = element_blank(),
-    #plot.title = element_blank()
-    #
-    
-
-    
     ##fixing the width of plotly figure in a flexible way
     ggplotly(gtest, 
              width=cdata$output_testing_plot_faculty_width*0.99,
@@ -704,42 +501,6 @@ function(input, output, session) {
                     orientation = "h", x = 1.1, y = 1.3))
     
   })
-  
-  
-  
-  ## Lab delay labels
-  # TO DO: this is currently commented out since data is not yet available
-  
-  # output$lab_delay_label <- renderUI({box(
-  #   width=6,
-  #   height=80,
-  #   p("Median days from sample collection to test result day"),
-  #   solidHeader=TRUE
-  # )})
-  # 
-  # output$lab_unh_label <- renderUI({box(
-  #   h4(random_delays()[1]),
-  #   em("UNH"),
-  #   width=2, 
-  #   height=80,
-  #   solidHeader = TRUE
-  # )})
-  # 
-  # output$lab_quest_label <- renderUI({box(
-  #   h4(random_delays()[2]),
-  #   em("Quest"),
-  #   width=2, 
-  #   height=80,
-  #   solidHeader = TRUE
-  # )})
-  # 
-  # output$lab_cmd_label <- renderUI({box(
-  #   h4(random_delays()[3]),
-  #   em("CMD"),
-  #   width=2, 
-  #   height=80,
-  #   solidHeader = TRUE
-  # )})
 
   #table out to UI
   week_lab_cont = htmltools::withTags(table(
