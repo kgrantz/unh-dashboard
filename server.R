@@ -99,9 +99,8 @@ function(input, output, session) {
  
    url <- a("Statewide restrictions", href="https://www.covidguidance.nh.gov/")
   output$current_restrictions <- renderUI({box(
-    tagList("URL link:", url),
-    width=4,
-    background="black"
+    tagList(url),
+    width=4
   )})
   
   output$state_date_updated <- renderText({statedatetimeupdated})
