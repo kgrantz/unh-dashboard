@@ -420,7 +420,8 @@ function(input, output, session) {
                   showlegend=FALSE, inherit=FALSE) %>%
         layout(yaxis2 = ay) %>%
         layout(legend = list(
-          orientation = "h", x = 1.1, y = 1.3))
+          orientation = "h", x = 1.1, y = 1.3)) %>%
+        config(displayModeBar = F)
       
   })
 
@@ -459,7 +460,8 @@ function(input, output, session) {
                       showlegend=FALSE, inherit=FALSE) %>%
             layout(yaxis2 = ay) %>%
             layout(legend = list(
-                  orientation = "h", x = 1.1, y = 1.3))
+                  orientation = "h", x = 1.1, y = 1.3)) %>%
+      config(displayModeBar = F)
 
     
   })
@@ -498,7 +500,8 @@ function(input, output, session) {
                       showlegend=FALSE, inherit=FALSE) %>%
             layout(yaxis2 = ay) %>%
             layout(legend = list(
-                    orientation = "h", x = 1.1, y = 1.3))
+                    orientation = "h", x = 1.1, y = 1.3)) %>%
+      config(displayModeBar = F)
     
   })
 

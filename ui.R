@@ -184,7 +184,11 @@ dashboardPage(
                # now conditional to only display if campus = Durham
                conditionalPanel(
                  'input.Campus == "UNH DURHAM"',
-                 fluidRow(
+                 box(
+                   status="primary",
+                   title="UNH Durham Dormitories",
+                   solidHeader = TRUE,
+                   width=NULL,
                    div(style = "font-size: 12px;", ##reducing font size.
                        fluidRow(
                          dataTableOutput("mytable"),
