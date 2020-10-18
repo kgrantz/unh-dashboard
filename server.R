@@ -276,7 +276,7 @@ function(input, output, session) {
     #em("Total  (symptomatic)"),
     #br(),
     h4(strong(threshdf$isolated[threshdf$campus == campus_opt()])),
-    width=5, 
+    width=6, 
     height=80,
     solidHeader = TRUE)})
   # TO DO: commented out symptomatic because we don't have that data yet
@@ -347,7 +347,7 @@ function(input, output, session) {
   output$mytable = renderDataTable({
     DT::datatable(
       Dorm_tab,
-      options = list(dom="tp", pageLength=5),
+      options = list(dom="tp", pageLength=4),
       container = dorm_table
     )
   })
@@ -378,7 +378,8 @@ function(input, output, session) {
     tickfont = list(color = "#de2d26", size = "12"),
     overlaying = "y",
     side = "right",
-    title = "7 day % positive"
+    title = "7 day % positive",
+    ticksuffix = "%"
   )
 
   date_breaks = seq(min(tecCampusfinal$date),max(tecCampusfinal$date),by=1)

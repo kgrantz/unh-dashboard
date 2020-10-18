@@ -158,9 +158,9 @@ dashboardPage(
                         # The id lets us use input$tabset1 on the server to find the current tab
                         id = "campus_epi_curve",
                         width=NULL,
-                        height=240,
-                        tabPanel("On / Off campus", plotOutput("location_plot",height=200)),
-                        tabPanel("Student / Faculty", plotOutput("personnel_plot",height=200))
+                        height=305,
+                        tabPanel("On / Off campus", plotOutput("location_plot",height=250)),
+                        tabPanel("Student / Faculty", plotOutput("personnel_plot",height=250))
                  )
                  
                ),# end fluidRow
@@ -172,12 +172,12 @@ dashboardPage(
                      uiOutput("n_isol_label"),
                      #),
                      #fluidRow(
-                     uiOutput("n_quar"),
+                     uiOutput("n_quar")
                      #),
                      #),
                      #fluidRow(
-                     uiOutput("n_test"))
-               ), # end fluidRow
+                     #uiOutput("n_test"))
+               )), # end fluidRow
                
                
                # Dorm table
@@ -193,7 +193,7 @@ dashboardPage(
                        fluidRow(
                          dataTableOutput("mytable"),
                          width=NULL,
-                         height=70)
+                         height=80)
                    )
                  ) # end fluidRow
                ) # end conditional panel
@@ -201,15 +201,16 @@ dashboardPage(
         ),# END lefthand column
         
         column(width=6,
+               style = "background-color:#FFFFFF;", 
                ## START righthand column
                tabBox(title = h5("Testing Curve"),
                       # The id lets us use input$tabset1 on the server to find the current tab
                       id = "campus_epi_curve",
                       width=NULL,
-                      height=400,
-                      tabPanel("Overall", plotlyOutput("testing_plot",height=350)),
-                      tabPanel("Student",plotlyOutput("testing_plot_student",height=350)),
-                      tabPanel("Faculty / Staff", plotlyOutput("testing_plot_faculty", height=350))
+                      height=380,
+                      tabPanel("Overall", plotlyOutput("testing_plot",height=330)),
+                      tabPanel("Student",plotlyOutput("testing_plot_student",height=330)),
+                      tabPanel("Faculty / Staff", plotlyOutput("testing_plot_faculty", height=330))
                ), br(),
                  fluidRow(
                    #uiOutput("lab_delay_label"),
