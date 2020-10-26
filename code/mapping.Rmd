@@ -48,26 +48,26 @@ greenspace <- filter(BaseMap,LAND_USE=="Green Space")%>%
 ### bring in the case data
 ```{r}
 
-tests <- read_csv("raw_data/routinetesting.csv") %>%
-                left_join(read_csv("data/raw_data/individualdemographics.csv")) %>%
+tests <- read_csv("raw_data/10-25-2020/routinetesting.csv") %>%
+                left_join(read_csv("raw_data/10-25-2020/individualdemographics.csv")) %>%
                  mutate(date=ifelse(is.na(collectdate),
                      as.character(resultsdate),
                      as.character(collectdate)))%>%
                 mutate(date=as.Date(date))
 
 cases <- tests %>% filter(result=="Positive") %>%
-                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                left_join(read_csv("generated_data/linkingfile.csv")) %>%
                 group_by(BUILDING_N) %>%
                 summarise(cases=n())
 
 Allcases <- tests %>% filter(result=="Positive") %>%
-                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                left_join(read_csv("generated_data/linkingfile.csv")) %>%
                 group_by(BUILDING_N) %>%
                 summarise(cases=n()) 
 
 cases10 <- tests %>% filter(result=="Positive") %>%
                 filter(date>=(Sys.Date()-10))%>%
-                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                left_join(read_csv("generated_data/linkingfile.csv")) %>%
                 group_by(BUILDING_N) %>%
                 summarise(cases=n())
 
@@ -75,7 +75,7 @@ cases10 <- tests %>% filter(result=="Positive") %>%
 
 dormlist <- tests %>% filter(!is.na(dorm)) %>%
                 distinct(dorm) %>%
-                left_join(read_csv("data/tidy_data/linkingfile.csv")) %>%
+                left_join(read_csv("generated_data/linkingfile.csv")) %>%
                 select(-FACILITIES)
 
 
