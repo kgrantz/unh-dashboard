@@ -60,6 +60,7 @@ cont_week <- data.frame(week_no = seq(min_week, max_week, 1))
 
 # rolling up to week level
 epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
+  filter(result == "Positive") %>%
   group_by(week_no) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive")) %>%
@@ -222,6 +223,7 @@ table_levels_campus <- merge(campus,campus_location) %>%
 
 # rolling up date level data to required levels
 routinetesting_campus_location<- routinetesting_w_week_demo[ ,c("result","week_no","campus","campus_location")] %>%
+  filter(result == "Positive") %>%
   group_by(week_no, campus,campus_location) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive"))%>%
@@ -238,6 +240,7 @@ table_levels_user <- merge(campus,personnel) %>%
 
 # rolling up date level data to required levels
 routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status_comb")] %>%
+  filter(result == "Positive") %>%
   group_by(week_no, campus,user_status_comb) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive"))%>%
