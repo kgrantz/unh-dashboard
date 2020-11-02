@@ -81,10 +81,9 @@ cont_week <- data.frame(week_no = seq(min_week, max_week, 1))
 
 # rolling up to week level
 epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
-  filter(result == "Positive") %>%
   group_by(week_no) %>%
   ## cases = count of positive results
-  summarise(cases = sum(result == "Positive")) %>%
+  summarise(cases = sum(result == "Positive", na.rm=TRUE)) %>%
   right_join(cont_week) %>%
   ## replacing NA with 0 - later check why we have NAs
   mutate(cases=ifelse(is.na(cases),0,cases)) %>%
@@ -244,10 +243,9 @@ table_levels_campus <- merge(campus,campus_location) %>%
 
 # rolling up date level data to required levels
 routinetesting_campus_location<- routinetesting_w_week_demo[ ,c("result","week_no","campus","campus_location")] %>%
-  filter(result == "Positive") %>%
   group_by(week_no, campus,campus_location) %>%
   ## cases = count of positive results
-  summarise(cases = sum(result == "Positive"))%>%
+  summarise(cases = sum(result == "Positive", na.rm=TRUE))%>%
   ##getting all the levels missed by roll up not having any data
   right_join(table_levels_campus) %>%
   ## replacing NA with 0 - later check why we have NAs if present in raw data
@@ -261,10 +259,9 @@ table_levels_user <- merge(campus,personnel) %>%
 
 # rolling up date level data to required levels
 routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status_comb")] %>%
-  filter(result == "Positive") %>%
   group_by(week_no, campus,user_status_comb) %>%
   ## cases = count of positive results
-  summarise(cases = sum(result == "Positive"))%>%
+  summarise(cases = sum(result == "Positive", na.rm=TRUE))%>%
   right_join(table_levels_user) %>%
   ## replacing NA with 0 - later check why we have NAs
   mutate(cases=ifelse(is.na(cases),0,cases)) %>%
