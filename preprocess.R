@@ -13,16 +13,17 @@ routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
                      as.character(collectdate))) %>%
   mutate(date=as.Date(date))%>%
   # recode the results
-  mutate(result=recode(result,
-                       Invalid = "Invalid / Rejected / Not Performed",
-                       Rejected = "Invalid / Rejected / Not Performed",
-                       `Test Not Performed` = "Invalid / Rejected / Not Performed",
-                       `No Result` = "Invalid / Rejected / Not Performed",
-                       `Inconclusive`="Inconclusive",
-                       Positive= "Positive",
-                       Negative="Negative",
-                       .default=NA_character_
-  ))
+  mutate(result_original = result,
+         result = tolower(result)) %>%
+  mutate(result_num=recode(result,
+                           "negative" = 0,
+                           "positive" = 1,
+                           "test was positive provided letter to be on campus" = 1,
+                           "inconclusive" = 2,
+                           .default = 3)) %>%
+  mutate(result = factor(result_num,
+                         levels = 0:3,
+                         labels = c("Negative", "Positive", "Inconclusive", "Invalid / Rejected / Not Performed")))
 
 isolationquarantine <- read_csv("raw_data/isolationquarantine.csv")
 
@@ -41,6 +42,26 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
   mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus")) %>%
   mutate(campus = toupper(campus))
 
+## remove demographic duplicates if they still exist
+## favor entries that have complete campus, age, user_status where available
+## logic: add number of missing values (of campus, age, user_status)
+## arrange data so that NAs are last, then fill in NAs
+## keep the row that had the fewest elements filled in
+individualdemographics <- individualdemographics %>%
+  group_by(uid) %>%
+  mutate(n_missing = sum(is.na(c(user_status, sex, age, campus)), na.rm=TRUE)) %>%
+  arrange(user_status) %>%
+  fill(user_status) %>%
+  arrange(sex) %>%
+  fill(sex) %>%
+  arrange(age) %>%
+  fill(age) %>%
+  arrange(campus) %>%
+  fill(campus) %>%
+  arrange(n_missing) %>%
+  mutate(n = 1:n()) %>%
+  ungroup() %>%
+  filter(n==1)
 
 #### HOME PAGE ---------------------------------- ####
 
