@@ -42,26 +42,6 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
   mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus")) %>%
   mutate(campus = toupper(campus))
 
-## remove demographic duplicates if they still exist
-## favor entries that have complete campus, age, user_status where available
-## logic: add number of missing values (of campus, age, user_status)
-## arrange data so that NAs are last, then fill in NAs
-## keep the row that had the fewest elements filled in
-individualdemographics <- individualdemographics %>%
-  group_by(uid) %>%
-  mutate(n_missing = sum(is.na(c(user_status, sex, age, campus)), na.rm=TRUE)) %>%
-  arrange(user_status) %>%
-  fill(user_status) %>%
-  arrange(sex) %>%
-  fill(sex) %>%
-  arrange(age) %>%
-  fill(age) %>%
-  arrange(campus) %>%
-  fill(campus) %>%
-  arrange(n_missing) %>%
-  mutate(n = 1:n()) %>%
-  ungroup() %>%
-  filter(n==1)
 
 #### HOME PAGE ---------------------------------- ####
 
