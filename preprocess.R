@@ -13,16 +13,17 @@ routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
                      as.character(collectdate))) %>%
   mutate(date=as.Date(date))%>%
   # recode the results
-  mutate(result=recode(result,
-                       Invalid = "Invalid / Rejected / Not Performed",
-                       Rejected = "Invalid / Rejected / Not Performed",
-                       `Test Not Performed` = "Invalid / Rejected / Not Performed",
-                       `No Result` = "Invalid / Rejected / Not Performed",
-                       `Inconclusive`="Inconclusive",
-                       Positive= "Positive",
-                       Negative="Negative",
-                       .default=NA_character_
-  ))
+  mutate(result_original = result,
+         result = tolower(result)) %>%
+  mutate(result_num=recode(result,
+                           "negative" = 0,
+                           "positive" = 1,
+                           "test was positive provided letter to be on campus" = 1,
+                           "inconclusive" = 2,
+                           .default = 3)) %>%
+  mutate(result = factor(result_num,
+                         levels = 0:3,
+                         labels = c("Negative", "Positive", "Inconclusive", "Invalid / Rejected / Not Performed")))
 
 isolationquarantine <- read_csv("raw_data/isolationquarantine.csv")
 
