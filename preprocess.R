@@ -13,16 +13,17 @@ routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
                      as.character(collectdate))) %>%
   mutate(date=as.Date(date))%>%
   # recode the results
-  mutate(result=recode(result,
-                       Invalid = "Invalid / Rejected / Not Performed",
-                       Rejected = "Invalid / Rejected / Not Performed",
-                       `Test Not Performed` = "Invalid / Rejected / Not Performed",
-                       `No Result` = "Invalid / Rejected / Not Performed",
-                       `Inconclusive`="Inconclusive",
-                       Positive= "Positive",
-                       Negative="Negative",
-                       .default=NA_character_
-  ))
+  mutate(result_original = result,
+         result = tolower(result)) %>%
+  mutate(result_num=recode(result,
+                           "negative" = 0,
+                           "positive" = 1,
+                           "test was positive provided letter to be on campus" = 1,
+                           "inconclusive" = 2,
+                           .default = 3)) %>%
+  mutate(result = factor(result_num,
+                         levels = 0:3,
+                         labels = c("Negative", "Positive", "Inconclusive", "Invalid / Rejected / Not Performed")))
 
 isolationquarantine <- read_csv("raw_data/isolationquarantine.csv")
 
@@ -41,6 +42,26 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
   mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus")) %>%
   mutate(campus = toupper(campus))
 
+## remove demographic duplicates if they still exist
+## favor entries that have complete campus, age, user_status where available
+## logic: add number of missing values (of campus, age, user_status)
+## arrange data so that NAs are last, then fill in NAs
+## keep the row that had the fewest elements filled in
+individualdemographics <- individualdemographics %>%
+  group_by(uid) %>%
+  mutate(n_missing = sum(is.na(c(user_status, sex, age, campus)), na.rm=TRUE)) %>%
+  arrange(user_status) %>%
+  fill(user_status) %>%
+  arrange(sex) %>%
+  fill(sex) %>%
+  arrange(age) %>%
+  fill(age) %>%
+  arrange(campus) %>%
+  fill(campus) %>%
+  arrange(n_missing) %>%
+  mutate(n = 1:n()) %>%
+  ungroup() %>%
+  filter(n==1)
 
 #### HOME PAGE ---------------------------------- ####
 
@@ -60,10 +81,9 @@ cont_week <- data.frame(week_no = seq(min_week, max_week, 1))
 
 # rolling up to week level
 epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
-  filter(result == "Positive") %>%
   group_by(week_no) %>%
   ## cases = count of positive results
-  summarise(cases = sum(result == "Positive")) %>%
+  summarise(cases = sum(result == "Positive", na.rm=TRUE)) %>%
   right_join(cont_week) %>%
   ## replacing NA with 0 - later check why we have NAs
   mutate(cases=ifelse(is.na(cases),0,cases)) %>%
@@ -223,10 +243,9 @@ table_levels_campus <- merge(campus,campus_location) %>%
 
 # rolling up date level data to required levels
 routinetesting_campus_location<- routinetesting_w_week_demo[ ,c("result","week_no","campus","campus_location")] %>%
-  filter(result == "Positive") %>%
   group_by(week_no, campus,campus_location) %>%
   ## cases = count of positive results
-  summarise(cases = sum(result == "Positive"))%>%
+  summarise(cases = sum(result == "Positive", na.rm=TRUE))%>%
   ##getting all the levels missed by roll up not having any data
   right_join(table_levels_campus) %>%
   ## replacing NA with 0 - later check why we have NAs if present in raw data
@@ -240,10 +259,9 @@ table_levels_user <- merge(campus,personnel) %>%
 
 # rolling up date level data to required levels
 routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status_comb")] %>%
-  filter(result == "Positive") %>%
   group_by(week_no, campus,user_status_comb) %>%
   ## cases = count of positive results
-  summarise(cases = sum(result == "Positive"))%>%
+  summarise(cases = sum(result == "Positive", na.rm=TRUE))%>%
   right_join(table_levels_user) %>%
   ## replacing NA with 0 - later check why we have NAs
   mutate(cases=ifelse(is.na(cases),0,cases)) %>%
