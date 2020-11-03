@@ -38,9 +38,15 @@ individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
                             Staff="Employee / Staff",
                             Unknown="Employee / Staff" ## per call 9/24, these are mostly contractors
   )) %>%
-  ##defining column campus location as its not explicitly defined
+  ## defining column campus location as its not explicitly defined
   mutate(campus_location = ifelse(is.na(dorm),"Off Campus","On Campus")) %>%
-  mutate(campus = toupper(campus))
+  ## redefining campus labels. clunky, but flexible in case new campus labels get added
+  mutate(campus_orig = toupper(campus)) %>%
+  mutate(campus = recode(campus_orig,
+                         "UNH DURHAM" = "UNH DURHAM",
+                         "UNH LAW" = "UNH LAW",
+                         "UNH MANCHESTER" = "UNH MANCHESTER",
+                         .default = "OTHER"))
 
 ## remove demographic duplicates if they still exist
 ## favor entries that have complete campus, age, user_status where available
