@@ -188,7 +188,7 @@ function(input, output, session) {
   )})
   
   ## pct isol ---
-  pct_isol_dur <- subset(threshdf, campus == "UNH DURHAM")$isolated/59 * 100
+  pct_isol_dur <- subset(threshdf, campus == "UNH DURHAM")$isolated_in_bed/59 * 100
   
   output$pct_isol_durham <- renderUI({box(
     paste(round(pct_isol_dur, 1), "%", sep=""),
@@ -213,7 +213,7 @@ function(input, output, session) {
   )})
   
   ## pct quar ---
-  pct_quar_dur <- subset(threshdf, campus == "UNH DURHAM")$quarantined/180 * 100
+  pct_quar_dur <- subset(threshdf, campus == "UNH DURHAM")$quarantined_in_bed/180 * 100
   
   output$pct_quar_durham <- renderUI({box(
     paste(round(pct_quar_dur, 1), "%", sep=""),
