@@ -112,23 +112,21 @@ dashboardPage(
                   uiOutput("active_cases_concord")
                 ),
                 fluidRow(
-                  box("Case Rate",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  uiOutput("case_rates_durham"),
-                  uiOutput("case_rates_manch"),
-                  uiOutput("case_rates_concord")
+                  box("% Positive", br(), em("7-day average", style = "font-size:8pt;"), width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  uiOutput("pct_pos_durham"),
+                  uiOutput("pct_pos_manch"),
+                  uiOutput("pct_pos_concord")
                 ),
                 fluidRow(
-                  # TO DO: change to % isolation beds when that data is available
-                  # box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  box("# in Isolation",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  # box("# in Isolation",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("pct_isol_durham"),
                   uiOutput("pct_isol_manch"),
                   uiOutput("pct_isol_concord")
                 ),
                 fluidRow(
-                  # TO DO: change to % quarantine beds when that data is available
-                  # box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
-                  box("# in Quarantine", width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  # box("# in Quarantine", width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("pct_quar_durham"),
                   uiOutput("pct_quar_manch"),
                   uiOutput("pct_quar_concord")

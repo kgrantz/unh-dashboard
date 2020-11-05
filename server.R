@@ -208,7 +208,7 @@ function(input, output, session) {
   
   output$pct_isol_manch <- renderUI({box(
     # subset(threshdf, campus == "UNH MANCHESTER")$isolated,
-    em("No isolation beds", style = "font-size:10pt;"),
+    em("No isolation beds", style = "font-size:9pt;"),
     width=3,
     height=80,
     background = NULL
@@ -217,7 +217,7 @@ function(input, output, session) {
 
   output$pct_isol_concord <- renderUI({box(
     # subset(threshdf, campus == "UNH LAW")$isolated,
-    em("No isolation beds", style = "font-size:10pt;"),
+    em("No isolation beds", style = "font-size:9pt;"),
     width=3,
     height=80,
     background = NULL
@@ -237,7 +237,7 @@ function(input, output, session) {
   
   output$pct_quar_manch <- renderUI({box(
     # subset(threshdf, campus == "UNH MANCHESTER")$quarantined,
-    em("No quarantine beds", style = "font-size:10pt;"),
+    em("No quarantine beds", style = "font-size:9pt;"),
     width=3,
     height=80,
     background = NULL
@@ -246,7 +246,7 @@ function(input, output, session) {
 
   output$pct_quar_concord <- renderUI({box(
     # subset(threshdf, campus == "UNH LAW")$quarantined,
-    em("No quarantine beds", style = "font-size:10pt;"),
+    em("No quarantine beds", style = "font-size:9pt;"),
     width=3,
     height=80,
     background = NULL
