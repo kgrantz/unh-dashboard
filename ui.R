@@ -63,7 +63,7 @@ dashboardPage(
                      width=NULL,
                      solidHeader = TRUE,
                      title = "Confirmed COVID-19 Cases in UNH Community",
-                     plotOutput("epi_curve_total", height=248)
+                     plotOutput("epi_curve_total", height=260)
                  )# end box
                ),#end fluid row
                fluidRow(
@@ -106,7 +106,7 @@ dashboardPage(
                     )
                 ),
                 fluidRow(
-                  box("Active Cases",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("Active Cases",width=3, height=90,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("active_cases_durham"),
                   uiOutput("active_cases_manch"),
                   uiOutput("active_cases_concord")
@@ -118,14 +118,14 @@ dashboardPage(
                   uiOutput("pct_pos_concord")
                 ),
                 fluidRow(
-                  box("% Isolation", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("% Isolation", br(), "Beds in Use",width=3, height=90,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   # box("# in Isolation",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("pct_isol_durham"),
                   uiOutput("pct_isol_manch"),
                   uiOutput("pct_isol_concord")
                 ),
                 fluidRow(
-                  box("% Quar.", br(), "Beds in Use",width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
+                  box("% Quar.", br(), "Beds in Use",width=3, height=90,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   # box("# in Quarantine", width=3, height=80,style="font-weight: bold; font-size: 13px; vertical-align: middle",solidHeader=TRUE),
                   uiOutput("pct_quar_durham"),
                   uiOutput("pct_quar_manch"),
