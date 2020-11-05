@@ -116,7 +116,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH DURHAM")$cases,
     width=3, 
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 20, 100, 200)),
     solidHeader = TRUE
   )})
   
@@ -124,7 +124,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH MANCHESTER")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 20, 100, 200)),
     solidHeader=TRUE
   )})
   
@@ -132,7 +132,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH LAW")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 20, 100, 200)),
     solidHeader=TRUE
   )})
   
@@ -162,6 +162,36 @@ function(input, output, session) {
     width=3,
     height=80,
     background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$rate, c(-1, 5, 100, 200)),
+    solidHeader=TRUE
+  )})
+  
+  ## 7-day % averages
+  pos_date <- max(pct_pos_daily$date)
+  dur_pct <- subset(pct_pos_daily, campus == "UNH DURHAM" & date==pos_date & level=="Total")$pct_pos_wk
+  manch_pct <- subset(pct_pos_daily, campus == "UNH MANCHESTER" & date==pos_date & level=="Total")$pct_pos_wk
+  conc_pct <- subset(pct_pos_daily, campus == "UNH LAW" & date==pos_date & level=="Total")$pct_pos_wk
+  
+  output$pct_pos_durham <- renderUI({box(
+    paste(round(dur_pct*100,1), "%", sep=""),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(dur_pct, c(-1, 0.0025, 0.01, 0.07)),
+    solidHeader=TRUE
+  )})
+  
+  output$pct_pos_manch <- renderUI({box(
+    paste(round(manch_pct*100,1), "%", sep=""),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(manch_pct, c(-1, 0.0025, 0.01, 0.07)),
+    solidHeader=TRUE
+  )})
+  
+  output$pct_pos_concord <- renderUI({box(
+    paste(round(conc_pct*100,1), "%", sep=""),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(conc_pct, c(-1, 0.0025, 0.01, 0.07)),
     solidHeader=TRUE
   )})
   
