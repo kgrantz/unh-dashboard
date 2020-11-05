@@ -157,10 +157,14 @@ quardf <- isolationquarantine %>%
   filter(quar_entrydate<=Sys.Date()) %>%
   #limit to those who have an exit day after today or none listed
   filter(quar_exitdate>Sys.Date() |is.na(quar_exitdate)) %>%
-  distinct(uid) %>%
+  #keep one entry per UID, favor 'campus' location if exists
+  group_by(uid) %>%
+  arrange(location) %>%
+  summarize(location = location[1]) %>%
   left_join(individualdemographics) %>%
   group_by(campus) %>%
-  summarize(quarantined=n())
+  summarize(quarantined=n(),
+            quarantined_in_bed = sum(location=="Campus", na.rm=TRUE))
 
 
 # those who are isolated at the moment
@@ -169,10 +173,14 @@ isodf <- isolationquarantine %>%
   filter(iso_entrydate<=Sys.Date()) %>%
   #limit to those who have an exit day after or none listed
   filter(iso_exitdate>Sys.Date()|is.na(iso_exitdate>Sys.Date())) %>%
-  distinct(uid) %>%
+  #keep one entry per UID, favor 'campus' location if exists
+  group_by(uid) %>%
+  arrange(location) %>%
+  summarize(location = location[1]) %>%
   left_join(individualdemographics) %>%
   group_by(campus) %>%
-  summarize(isolated=n())
+  summarize(isolated=n(),
+            isolated_in_bed = sum(location=="Campus", na.rm=TRUE))
 
 
 # number of people who are being tested (should this be our denominator???)

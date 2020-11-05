@@ -108,15 +108,11 @@ function(input, output, session) {
   ## CAMPUS SITUATION ---------
   
   ## active cases
-  random_active_cases <- reactive({
-    sample(0:200, 3)
-  })
-  
   output$active_cases_durham <- renderUI({box(
     subset(threshdf, campus == "UNH DURHAM")$cases,
     width=3, 
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 20, 100, 200)),
     solidHeader = TRUE
   )})
   
@@ -124,7 +120,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH MANCHESTER")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 20, 100, 200)),
     solidHeader=TRUE
   )})
   
@@ -132,15 +128,11 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH LAW")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 10, 50, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 20, 100, 200)),
     solidHeader=TRUE
   )})
   
-  ## case rates
-  random_case_rates <- reactive({
-    sample(0:200, 3)
-  })
-  
+  ## case rates ---
   output$case_rates_durham <- renderUI({box(
     paste(round(subset(threshdf, campus == "UNH DURHAM")$rate,2)," per 1000", sep=""),
     width=3,
@@ -165,57 +157,84 @@ function(input, output, session) {
     solidHeader=TRUE
   )})
   
-  ## pct isol
-  random_pct_isol <- reactive({
-    sample(0:100, 3)
-  })
+  ## 7-day % averages ---
+  pos_date <- max(pct_pos_daily$date)
+  dur_pct <- subset(pct_pos_daily, campus == "UNH DURHAM" & date==pos_date & level=="Total")$pct_pos_wk
+  manch_pct <- subset(pct_pos_daily, campus == "UNH MANCHESTER" & date==pos_date & level=="Total")$pct_pos_wk
+  conc_pct <- subset(pct_pos_daily, campus == "UNH LAW" & date==pos_date & level=="Total")$pct_pos_wk
   
-  output$pct_isol_durham <- renderUI({box(
-    subset(threshdf, campus == "UNH DURHAM")$isolated,
+  output$pct_pos_durham <- renderUI({box(
+    paste(round(dur_pct*100,1), "%", sep=""),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$isolated, c(-1, 10, 50, 90)),
+    background=pick_color_threshold_numeric(dur_pct, c(-1, 0.0025, 0.01, 0.07)),
+    solidHeader=TRUE
+  )})
+  
+  output$pct_pos_manch <- renderUI({box(
+    paste(round(manch_pct*100,1), "%", sep=""),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(manch_pct, c(-1, 0.0025, 0.01, 0.07)),
+    solidHeader=TRUE
+  )})
+  
+  output$pct_pos_concord <- renderUI({box(
+    paste(round(conc_pct*100,1), "%", sep=""),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(conc_pct, c(-1, 0.0025, 0.01, 0.07)),
+    solidHeader=TRUE
+  )})
+  
+  ## pct isol ---
+  pct_isol_dur <- subset(threshdf, campus == "UNH DURHAM")$isolated_in_bed/59 * 100
+  
+  output$pct_isol_durham <- renderUI({box(
+    paste(round(pct_isol_dur, 1), "%", sep=""),
+    width=3,
+    height=80,
+    background=pick_color_threshold_numeric(pct_isol_dur, c(-1, 10, 50, 90)),
     solidHeader=TRUE
   )})
   
   output$pct_isol_manch <- renderUI({box(
-    subset(threshdf, campus == "UNH MANCHESTER")$isolated,
+    em("No isolation beds", style = "font-size:9pt;"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$isolated, c(-1, 10, 50, 90))
+    background = NULL
   )})
-  
+
   output$pct_isol_concord <- renderUI({box(
-    subset(threshdf, campus == "UNH LAW")$isolated,
+    em("No isolation beds", style = "font-size:9pt;"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric( subset(threshdf, campus == "UNH LAW")$isolated, c(-1, 10, 50, 90))
+    background = NULL
   )})
   
-  ## pct quar
-  random_pct_quar <- reactive({
-    sample(0:100, 3)
-  })
+  ## pct quar ---
+  pct_quar_dur <- subset(threshdf, campus == "UNH DURHAM")$quarantined_in_bed/180 * 100
   
   output$pct_quar_durham <- renderUI({box(
-    subset(threshdf, campus == "UNH DURHAM")$quarantined,
+    paste(round(pct_quar_dur, 1), "%", sep=""),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$quarantined, c(-1, 25, 50, 90))
+    background=pick_color_threshold_numeric(pct_quar_dur, c(-1, 25, 50, 90)),
+    solidHeader=TRUE
   )})
   
   output$pct_quar_manch <- renderUI({box(
-    subset(threshdf, campus == "UNH MANCHESTER")$quarantined,
+    em("No quarantine beds", style = "font-size:9pt;"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$quarantined, c(-1, 25, 50, 90))
+    background = NULL
   )})
-  
+
   output$pct_quar_concord <- renderUI({box(
-    subset(threshdf, campus == "UNH LAW")$quarantined,
+    em("No quarantine beds", style = "font-size:9pt;"),
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$quarantined, c(-1, 25, 50, 90))
+    background = NULL
   )})
   
   ## UNH Campus Situation -------------------------------------------------------
