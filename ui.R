@@ -58,14 +58,34 @@ dashboardPage(
             h4(strong("University of New Hampshire COVID-19 Dashboard"))#the html was interfering with render plot below. Need to figure out a workaround to display the data
         ),
         column(width=6,
+               
+               
                fluidRow(
-                 box(status="primary",
-                     width=NULL,
-                     solidHeader = TRUE,
-                     title = "Confirmed COVID-19 Cases in UNH Community",
-                     plotOutput("epi_curve_total", height=260)
-                 )# end box
-               ),#end fluid row
+                 tabBox(
+                         title = h5("Confirmed COVID-19 Cases in UNH Community"),
+                        # The id lets us use input$tabset1 on the server to find the current tab
+                        # id = "total_epicurve",
+                        width=NULL,
+                        height=260,
+                        tabPanel("Daily", plotOutput("epi_curve_total",height=200)),
+                        tabPanel("Weekly", plotOutput("epi_curve_total",height=200))
+                 )
+               ),
+               
+               
+               #ORIGINAL EPICURVE
+               
+               # fluidRow(
+               #   box(status="primary",
+               #       width=NULL,
+               #       solidHeader = TRUE,
+               #       title = "Confirmed COVID-19 Cases in UNH Community",
+               #       plotOutput("epi_curve_total", height=260)
+               #   )# end box
+               # ),#end fluid row
+
+               
+               
                fluidRow(
                  box(
                    status="primary",
