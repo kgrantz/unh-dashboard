@@ -39,6 +39,9 @@ function(input, output, session) {
   
   week_breaks <-  unique(epi_curve_overall_week$week_start_date)
   
+  biweek_breaks <- week_breaks[length(week_breaks)-seq(0,length(week_breaks),by=2)]
+  
+  
   output$epi_curve_total <- renderPlot({
     p = ggplot(epi_curve_overall_week, aes(week_start_date, cases)) +
           geom_bar(stat="identity", fill="darkblue") +
@@ -48,6 +51,20 @@ function(input, output, session) {
           theme(axis.title.x=element_blank(),
                 axis.text.x=element_text(angle=90),
                 axis.ticks.x=element_blank()) 
+    p
+  })
+  
+  
+  output$epi_curve_total_daily <- renderPlot({
+    p = ggplot(epi_curve_overall_day, aes(date, cases)) +
+      geom_bar(stat="identity", fill="darkblue") +
+      labs(x="Date",y="Cases", title='Total new cases diagnosed per day') +
+      scale_x_date(breaks = biweek_breaks, date_labels = "%b-%d",
+                   minor_breaks = week_breaks) +
+      theme_bw()
+      # theme(axis.title.x=element_blank(),
+      #       axis.text.x=element_text(angle=90),
+      #       axis.ticks.x=element_blank()) 
     p
   })
   

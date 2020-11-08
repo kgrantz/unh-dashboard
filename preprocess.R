@@ -84,6 +84,8 @@ routinetesting_w_week <- routinetesting %>%
 min_week <- min(routinetesting_w_week$week_no)
 max_week <- max(routinetesting_w_week$week_no)
 cont_week <- data.frame(week_no = seq(min_week, max_week, 1))
+cont_day<- seq.Date(as.Date("2020-08-07"),as.Date(Sys.Date()),by="days") %>%
+            data.frame(date=.)
 
 # rolling up to week level
 epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
@@ -94,6 +96,15 @@ epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
   ## replacing NA with 0 - later check why we have NAs
   mutate(cases=ifelse(is.na(cases),0,cases)) %>%
   mutate(week_start_date=get_date(week_no, start=7))
+
+# rolling up to daily level
+epi_curve_overall_day <- routinetesting %>%
+    group_by(date) %>%
+    summarise(cases = sum(result == "Positive", na.rm=TRUE)) %>%
+    right_join(cont_day) %>%
+    mutate(cases=ifelse(is.na(cases),0,cases))
+  
+
 
 
 

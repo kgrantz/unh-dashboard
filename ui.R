@@ -67,7 +67,7 @@ dashboardPage(
                         # id = "total_epicurve",
                         width=NULL,
                         height=260,
-                        tabPanel("Daily", plotOutput("epi_curve_total",height=200)),
+                        tabPanel("Daily", plotOutput("epi_curve_total_daily",height=200)),
                         tabPanel("Weekly", plotOutput("epi_curve_total",height=200))
                  )
                ),
