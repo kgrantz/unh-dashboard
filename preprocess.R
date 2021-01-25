@@ -25,7 +25,31 @@ routinetesting<- read_csv("raw_data/routinetesting.csv") %>%
                          levels = 0:3,
                          labels = c("Negative", "Positive", "Inconclusive", "Invalid / Rejected / Not Performed")))
 
-isolationquarantine <- read_csv("raw_data/isolationquarantine.csv")
+# Imputting missing quarantine/isolation dates
+isolationquarantine <- read_csv("raw_data/isolationquarantine.csv") %>%
+                       mutate(quar_entrydttm = as.POSIXct(quar_entrydate),
+                              quar_exitdttm = as.POSIXct(quar_exitdate),
+                              quar_exposuredttm = as.POSIXct(quar_exposuredate),
+                              iso_entrydttm = as.POSIXct(iso_entrydate),
+                              iso_exitdttm = as.POSIXct(iso_exitdate),
+                              quar_entrydate = as.Date(quar_entrydate),
+                              quar_exitdate = as.Date(quar_exitdate),
+                              quar_exposuredate = as.Date(quar_exposuredate),
+                              iso_entrydate = as.Date(iso_entrydate),
+                              iso_exitdate = as.Date(iso_exitdate),
+                              notifydttm = as.POSIXct(notifydate),
+                              notifydate = as.Date(notifydate))
+
+isolationquarantine <- isolationquarantine %>%
+                       mutate(quar_exitdate = ifelse(is.na(quar_exitdate) & !is.na(quar_entrydate),
+                                                     quar_entrydate + 14,
+                                                     quar_exitdate)) %>%
+                       mutate(iso_exitdate = ifelse(is.na(iso_exitdate) & !is.na(iso_entrydate),
+                                                     iso_entrydate + 14,
+                                                     iso_exitdate)) %>%
+                       mutate(quar_exitdate = as.Date(quar_exitdate, origin="1970-01-01")) %>%
+                       mutate(iso_exitdate = as.Date(iso_exitdate, origin="1970-01-01"))
+  
 
 individualdemographics <- read_csv("raw_data/individualdemographics.csv") %>%
   mutate(user_status_comb = recode(user_status,
@@ -75,27 +99,33 @@ individualdemographics <- individualdemographics %>%
 
 # adding week number and week start date for date
 routinetesting_w_week <- routinetesting %>%
-  mutate(week_no = date2week(date, week_start=7, floor_day=TRUE, numeric=TRUE))
+  mutate(week_no = lubridate::epiweek(date),
+         year = lubridate::year(date))
 
 # getting a continuous string of weeks
 # from min week available
 # to max week available
 # to include rows with 0 where there are no week values
-min_week <- min(routinetesting_w_week$week_no)
-max_week <- max(routinetesting_w_week$week_no)
-cont_week <- data.frame(week_no = seq(min_week, max_week, 1))
-cont_day<- seq.Date(as.Date("2020-08-07"),as.Date(Sys.Date()),by="days") %>%
-            data.frame(date=.)
+cont_day<- data.frame(date = seq.Date(as.Date("2020-08-02"),Sys.Date(),by="days"))
+
+cont_week <- cont_day %>% 
+             mutate(week_no = lubridate::epiweek(date),
+                    year = lubridate::year(date)) %>%
+             arrange(date) %>%
+             group_by(week_no, year) %>%
+             slice(1) %>%
+             rename(week_start_date = date) %>%
+             # removing 2021-01-01 -- nots start of epiweek
+             filter(week_start_date != "2021-01-01")
 
 # rolling up to week level
-epi_curve_overall_week <- routinetesting_w_week[ ,c("result","week_no")] %>%
-  group_by(week_no) %>%
+epi_curve_overall_week <- routinetesting_w_week %>%
+  group_by(week_no, year) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive", na.rm=TRUE)) %>%
   right_join(cont_week) %>%
   ## replacing NA with 0 - later check why we have NAs
-  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
-  mutate(week_start_date=get_date(week_no, start=7))
+  mutate(cases=ifelse(is.na(cases),0,cases))
 
 # rolling up to daily level
 epi_curve_overall_day <- routinetesting %>%
@@ -120,11 +150,11 @@ covid_num <- statecondwebsite %>%
   html_text()
 
 covid_num[4] <- as.numeric(gsub(",", "", covid_num[4]))
-covid_num[6] <- as.numeric(gsub(",", "", covid_num[6]))
+covid_num[5] <- as.numeric(gsub(",", "", covid_num[5]))
 
 
 state_curr_cases <- covid_num[4] 
-state_curr_hosp <- covid_num[6]
+state_curr_hosp <- covid_num[5]
 state_curr_cond <- "Limited Open"
 
 statedatetimeupdated <- statecondwebsite %>%
@@ -167,7 +197,7 @@ quardf <- isolationquarantine %>%
   #limit to those which have an entry date 
   filter(quar_entrydate<=Sys.Date()) %>%
   #limit to those who have an exit day after today or none listed
-  filter(quar_exitdate>Sys.Date() |is.na(quar_exitdate)) %>%
+  filter(quar_exitdate>Sys.Date()) %>%
   #keep one entry per UID, favor 'campus' location if exists
   group_by(uid) %>%
   arrange(location) %>%
@@ -182,8 +212,8 @@ quardf <- isolationquarantine %>%
 isodf <- isolationquarantine %>% 
   #limit to those which have an entry date 
   filter(iso_entrydate<=Sys.Date()) %>%
-  #limit to those who have an exit day after or none listed
-  filter(iso_exitdate>Sys.Date()|is.na(iso_exitdate>Sys.Date())) %>%
+  #limit to those who have an exit day after
+  filter(iso_exitdate>Sys.Date()) %>%
   #keep one entry per UID, favor 'campus' location if exists
   group_by(uid) %>%
   arrange(location) %>%
@@ -241,61 +271,45 @@ routinetesting_w_week_demo <- routinetesting_w_week %>%
   left_join(individualdemographics, by="uid")
 
 # table skeleton for campus curve
-# we need to create table skeleton
-# to keep rows with 0 cases when there is no information for any combination
-# I know it looks like a tedious way to do it but its economic in case we
-# get more levels
-
-# check with Kyra and Forrest which campuses to keep
-campus <- data.frame(campus= unique(individualdemographics$campus))
-
-# personnel column unique values
-personnel <- data.frame(user_status_comb = c("Student","Faculty/Staff"))
-
-# campus location column unique values
-campus_location <- data.frame(campus_location=c("Off Campus","On Campus"))
-
-# weeks column unique values
-weeks <- data.frame(week_no=cont_week)
-
 # for campus location tab; cross join everything to get all required combinations. Then make a level column
-table_levels_campus <- merge(campus,campus_location) %>%
-  merge(weeks)%>%
+table_levels_campus <- expand_grid(
+  campus = unique(individualdemographics$campus),
+  campus_location=c("Off Campus","On Campus"),
+  cont_week
+ ) %>%
   mutate(level=campus_location, id="campus_location")
 
-
-# TO DO : in dashboard server, change the filters for campus and campus location
-
 # rolling up date level data to required levels
-routinetesting_campus_location<- routinetesting_w_week_demo[ ,c("result","week_no","campus","campus_location")] %>%
-  group_by(week_no, campus,campus_location) %>%
+routinetesting_campus_location<- routinetesting_w_week_demo %>%
+  group_by(week_no, year, campus, campus_location) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive", na.rm=TRUE))%>%
   ##getting all the levels missed by roll up not having any data
   right_join(table_levels_campus) %>%
   ## replacing NA with 0 - later check why we have NAs if present in raw data
-  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
-  mutate(week_start_date=get_date(week_no, start=7))
+  mutate(cases=ifelse(is.na(cases),0,cases))
 
 # for personnel location tab; cross join everything to get all required combinations. Then make a level column
-table_levels_user <- merge(campus,personnel) %>%
-  merge(weeks)%>%
+table_levels_user <- expand_grid(
+  campus = unique(individualdemographics$campus),
+  user_status_comb=c("Student","Faculty/Staff"),
+  cont_week
+  ) %>%
   mutate(level=user_status_comb, id="user_status")
 
 # rolling up date level data to required levels
-routinetesting_campus_personnel<- routinetesting_w_week_demo[ ,c("result","week_no","campus","user_status_comb")] %>%
-  group_by(week_no, campus,user_status_comb) %>%
+routinetesting_campus_personnel <- routinetesting_w_week_demo %>%
+  group_by(week_no, year, campus, user_status_comb) %>%
   ## cases = count of positive results
   summarise(cases = sum(result == "Positive", na.rm=TRUE))%>%
   right_join(table_levels_user) %>%
   ## replacing NA with 0 - later check why we have NAs
-  mutate(cases=ifelse(is.na(cases),0,cases)) %>%
-  mutate(week_start_date=get_date(week_no, start=7))
+  mutate(cases=ifelse(is.na(cases),0,cases))
 
 # row bind the data of different tabs. We can instead have these as 2 datasets also
 # final table for epi curve 
-routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("campus","id","level","week_no","week_start_date","cases")],
-                                            routinetesting_campus_personnel[ ,c("campus","id","level","week_no","week_start_date","cases")])
+routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("campus","id","level","week_no", "year", "week_start_date","cases")],
+                                            routinetesting_campus_personnel[ ,c("campus","id","level","week_no", "year", "week_start_date","cases")])
 
 
 
@@ -312,8 +326,6 @@ routinetesting_demograph_epi_curve <- rbind(routinetesting_campus_location[ ,c("
 #   # quarantined
 #   % all beds occupied
 # TO DO: decide if this is best "% positive" metric or want something different
-
-
 
 # Currently quarantined from dorms
 quardorm <- isolationquarantine %>% 
@@ -342,10 +354,15 @@ dormdf <- cases10 %>% group_by(campus, dorm) %>%
   arrange(-rate) %>%
   left_join(quardorm) %>%
   mutate(quarantined=ifelse(is.na(quarantined),0,quarantined)) %>%
-  mutate(quarantined=ifelse(quarantined>0 & quarantined<5, "<5", quarantined)) %>%
-  mutate(cases=ifelse(cases>0 & cases<5, "<5", cases)) %>%
-  arrange(cases, quarantined)
-
+  arrange(desc(cases), desc(quarantined)) %>%
+  mutate(quar_label=as.character(quarantined)) %>%
+  mutate(quar_label=ifelse(quarantined>0 & quarantined<5, "<5", quar_label)) %>%
+  mutate(cases_label=as.character(cases)) %>%
+  mutate(cases_label=ifelse(cases>0 & cases<5, "<5", cases_label)) %>%
+  select(-cases, -quarantined) %>%
+  rename(cases = cases_label,
+         quarantined = quar_label)
+  
 
 
 ### Testing epi curve ------------------------------- 
@@ -358,7 +375,8 @@ dormdf <- cases10 %>% group_by(campus, dorm) %>%
 ## for now keep the levels they've provided until we figure out which ones can be merged together
 # column count -- number in each category
 
-tecCampus1 <- routinetesting_w_week %>% left_join(individualdemographics) %>%
+tecCampus1 <- routinetesting_w_week %>% 
+  left_join(individualdemographics) %>%
   #remove those with missing or free text responses or inconclusive
   filter(!is.na(result)) %>%
   #remove those not on UNH Durham, Manchester or Law
