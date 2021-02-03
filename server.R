@@ -84,7 +84,7 @@ function(input, output, session) {
   output$state_case <- renderUI({box(
     state_curr_cases,
     width=4,
-    background=pick_color_threshold_numeric(as.numeric(state_curr_cases), c(0, 100, 1200, 1800)),
+    background=pick_color_threshold_numeric(as.numeric(state_curr_cases), c(0, 100, 3000, 6000)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
   )})
   
@@ -100,7 +100,7 @@ function(input, output, session) {
   output$hospitalization <- renderUI({box(
     state_curr_hosp,
     width=4,
-    background=pick_color_threshold_numeric(as.numeric(state_curr_hosp), c(0, 25, 50, 100)),
+    background=pick_color_threshold_numeric(as.numeric(state_curr_hosp), c(0, 25, 200, 400)),
     href="https://www.nh.gov/covid19/dashboard/active-cases.htm"
   )})
   
@@ -129,7 +129,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH DURHAM")$cases,
     width=3, 
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 20, 100, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH DURHAM")$cases, c(-1, 20, 150, 300)),
     solidHeader = TRUE
   )})
   
@@ -137,7 +137,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH MANCHESTER")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 20, 100, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH MANCHESTER")$cases, c(-1, 20, 150, 300)),
     solidHeader=TRUE
   )})
   
@@ -145,7 +145,7 @@ function(input, output, session) {
     subset(threshdf, campus == "UNH LAW")$cases,
     width=3,
     height=80,
-    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 20, 100, 200)),
+    background=pick_color_threshold_numeric(subset(threshdf, campus == "UNH LAW")$cases, c(-1, 20, 150, 300)),
     solidHeader=TRUE
   )})
   
@@ -205,7 +205,7 @@ function(input, output, session) {
   )})
   
   ## pct isol ---
-  pct_isol_dur <- subset(threshdf, campus == "UNH DURHAM")$isolated_in_bed/59 * 100
+  pct_isol_dur <- subset(threshdf, campus == "UNH DURHAM")$isolated_in_bed/217 * 100
   
   output$pct_isol_durham <- renderUI({box(
     paste(round(pct_isol_dur, 1), "%", sep=""),
