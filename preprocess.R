@@ -357,10 +357,10 @@ dormdf <- cases10 %>% group_by(campus, dorm) %>%
   arrange(desc(cases), desc(quarantined)) %>%
   mutate(quar_label=factor(quarantined,
                            levels = 0:1000,
-                           labels = c(0, rep("<5", 4), 5:1000))) %>%
+                           labels = c(0, rep("1-5", 4), 5:1000))) %>%
   mutate(cases_label=factor(cases,
                             levels = 0:1000,
-                            labels = c(0, rep("<5", 4), 5:1000))) %>%
+                            labels = c(0, rep("1-5", 4), 5:1000))) %>%
   select(-cases, -quarantined) %>%
   rename(cases = cases_label,
          quarantined = quar_label)
