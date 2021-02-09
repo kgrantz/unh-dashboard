@@ -355,10 +355,12 @@ dormdf <- cases10 %>% group_by(campus, dorm) %>%
   left_join(quardorm) %>%
   mutate(quarantined=ifelse(is.na(quarantined),0,quarantined)) %>%
   arrange(desc(cases), desc(quarantined)) %>%
-  mutate(quar_label=as.character(quarantined)) %>%
-  mutate(quar_label=ifelse(quarantined>0 & quarantined<5, "<5", quar_label)) %>%
-  mutate(cases_label=as.character(cases)) %>%
-  mutate(cases_label=ifelse(cases>0 & cases<5, "<5", cases_label)) %>%
+  mutate(quar_label=factor(quarantined,
+                           levels = 0:1000,
+                           labels = c(0, rep("<5", 4), 5:1000))) %>%
+  mutate(cases_label=factor(cases,
+                            levels = 0:1000,
+                            labels = c(0, rep("<5", 4), 5:1000))) %>%
   select(-cases, -quarantined) %>%
   rename(cases = cases_label,
          quarantined = quar_label)

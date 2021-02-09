@@ -383,7 +383,7 @@ function(input, output, session) {
   output$mytable = renderDataTable({
     DT::datatable(
       Dorm_tab,
-      options = list(dom="tp", pageLength=4),
+      options = list(dom="tp", pageLength=15),
       container = dorm_table
     )
   })
