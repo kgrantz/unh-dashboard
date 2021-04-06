@@ -141,20 +141,26 @@ epi_curve_overall_day <- routinetesting %>%
 ### Statewide conditions ------------------------------- 
 
 # get state conditions website
-statecondurl <- "https://www.nh.gov/covid19/index.htm"
+statecondurl <- "https://www.covid19.nh.gov/"
 statecondwebsite <- read_html(statecondurl)
 
 # get state current cases and current hospitalizations
 covid_num <- statecondwebsite %>%
-  html_nodes("td") %>%
-  html_text()
+  html_nodes(".covid-table") %>%
+  html_text() 
 
-covid_num[4] <- as.numeric(gsub(",", "", covid_num[4]))
-covid_num[5] <- as.numeric(gsub(",", "", covid_num[5]))
+state_curr_cases <- covid_num %>%
+  str_extract_all("(?<=Cases).*((\\d+,\\d+)|(\\d+))") %>%
+  str_replace(",", "") %>%
+  str_extract("\\d+")
+state_curr_cases <- as.numeric(state_curr_cases)
 
+state_curr_hosp <- covid_num %>%
+  str_extract_all("(?<=Hospitalizations).*((\\d+,\\d+)|(\\d+))") %>%
+  str_replace(",", "") %>%
+  str_extract("\\d+")
+state_curr_hosp <- as.numeric(state_curr_hosp)
 
-state_curr_cases <- covid_num[4] 
-state_curr_hosp <- covid_num[5]
 state_curr_cond <- "Limited Open"
 
 statedatetimeupdated <- statecondwebsite %>%
